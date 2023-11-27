@@ -1,11 +1,14 @@
 package quest
 
 import (
+	"log"
+
 	"github.com/arfaghifari/guild-board/src/database"
 	model "github.com/arfaghifari/guild-board/src/model/quest"
 )
 
 func GetAllCompletedQuest() (quests []model.GetQuestByStatus, err error) {
+
 	db := database.GetDB()
 
 	query := `
@@ -28,6 +31,7 @@ func GetAllCompletedQuest() (quests []model.GetQuestByStatus, err error) {
 }
 
 func GetAllAvailableQuest() (quests []model.GetQuestByStatus, err error) {
+	log.Println("Get All Available Quest Load")
 	db := database.GetDB()
 
 	query := `

@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -22,7 +21,7 @@ type Config struct {
 func Serve(cfg Config, router *mux.Router) {
 	srv := &http.Server{
 		Handler:      router,
-		Addr:         fmt.Sprint(":", cfg.Port),
+		Addr:         ":8000", //fmt.Sprint(":", cfg.Port),
 		WriteTimeout: cfg.WriteTimeout,
 		ReadTimeout:  cfg.ReadTimeout,
 	}

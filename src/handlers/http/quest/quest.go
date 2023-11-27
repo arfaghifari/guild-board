@@ -2,6 +2,8 @@ package quest
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -19,8 +21,14 @@ type GetQuestByStatusResponse struct {
 	Data   []model.GetQuestByStatus `json:"data"`
 }
 
+func GetHello(w http.ResponseWriter, r *http.Request) {
+	log.Println("Hello World")
+	fmt.Fprintf(w, "HELLO NAKAMA")
+}
+
 func GetQuestByStatus(w http.ResponseWriter, r *http.Request) {
 	status, _ := strconv.Atoi(r.URL.Query().Get("status"))
+	log.Println(r.URL.Query().Get("status"))
 	if status == 0 {
 		res, err := repo.GetAllAvailableQuest()
 		if err != nil {
@@ -37,8 +45,8 @@ func GetQuestByStatus(w http.ResponseWriter, r *http.Request) {
 		w.Write(resp)
 	}
 
-	if status == 0 {
-		res, err := repo.GetAllAvailableQuest()
+	if status == 1 {
+		res, err := repo.GetAllCompletedQuest()
 		if err != nil {
 			return
 		}

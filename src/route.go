@@ -18,11 +18,8 @@ func Main() {
 	router := mux.NewRouter()
 
 	// routes http
+	router.HandleFunc("/get-hello", questHandlers.GetHello).Methods(http.MethodGet)
 	router.HandleFunc("/get-quest-status", questHandlers.GetQuestByStatus).Methods(http.MethodGet)
-	// router.HandleFunc("/update-product", handlers.UpdateProduct).Methods(http.MethodPatch)
-	// router.HandleFunc("/delete-product", handlers.DeleteProduct).Methods(http.MethodDelete)
-
-	// router.HandleFunc("/banner", handlers.UploadBanner).Methods(http.MethodPost)
 
 	serverConfig := server.Config{
 		WriteTimeout: 5 * time.Second,
