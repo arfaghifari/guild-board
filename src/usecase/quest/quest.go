@@ -33,15 +33,23 @@ func TakeQuest(quest_id, adventurer_id int64) error {
 	return err
 }
 
-func ReportQuest(quest_id, adventurer_id int64) error {
-	err := repoAdv.AddCompletedQuest(adventurer_id)
-	if err != nil {
+func ReportQuest(quest_id, adventurer_id int64, is bool) error {
+	if !is {
+		quest := model.Quest{
+			ID:     quest_id,
+			Status: 0,
+		}
+		return repo.UpdateQuestStatus(quest)
+	} else {
+		err := repoAdv.AddCompletedQuest(adventurer_id)
+		if err != nil {
+			return err
+		}
+		quest := model.Quest{
+			ID:     quest_id,
+			Status: 2,
+		}
+		err = repo.UpdateQuestStatus(quest)
 		return err
 	}
-	quest := model.Quest{
-		ID:     quest_id,
-		Status: 2,
-	}
-	err = repo.UpdateQuestStatus(quest)
-	return err
 }

@@ -134,13 +134,13 @@ func TakeQuest(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReportQuest(w http.ResponseWriter, r *http.Request) {
-	var takeByRequest model.TakenBy
+	var reportQuest model.ReportQuest
 
-	if err := json.NewDecoder(r.Body).Decode(&takeByRequest); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&reportQuest); err != nil {
 		http.Error(w, "bad request", 400)
 		return
 	}
-	err := usecase.ReportQuest(takeByRequest.QuestID, takeByRequest.AdventurerID)
+	err := usecase.ReportQuest(reportQuest.QuestID, reportQuest.AdventurerID, reportQuest.IsCompleted)
 
 	if err != nil {
 		fmt.Fprintf(w, "success")
