@@ -9,6 +9,7 @@ import (
 
 	model "github.com/arfaghifari/guild-board/src/model/quest"
 	repo "github.com/arfaghifari/guild-board/src/repository/quest"
+	usecase "github.com/arfaghifari/guild-board/src/usecase/quest"
 )
 
 type Header struct {
@@ -59,5 +60,89 @@ func GetQuestByStatus(w http.ResponseWriter, r *http.Request) {
 		})
 
 		w.Write(resp)
+	}
+}
+
+func CreateQuest(w http.ResponseWriter, r *http.Request) {
+	var quest model.Quest
+
+	if err := json.NewDecoder(r.Body).Decode(&quest); err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+	err := repo.CreateQuest(quest)
+
+	if err != nil {
+		fmt.Fprintf(w, "success")
+	}
+}
+
+func DeleteQuest(w http.ResponseWriter, r *http.Request) {
+	var quest model.Quest
+
+	if err := json.NewDecoder(r.Body).Decode(&quest); err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+	err := repo.DeleteQuest(quest)
+
+	if err != nil {
+		fmt.Fprintf(w, "success")
+	}
+}
+
+func UpdateQuestRank(w http.ResponseWriter, r *http.Request) {
+	var quest model.Quest
+
+	if err := json.NewDecoder(r.Body).Decode(&quest); err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+	err := repo.UpdateQuestRank(quest)
+
+	if err != nil {
+		fmt.Fprintf(w, "success")
+	}
+}
+
+func UpdateQuestReward(w http.ResponseWriter, r *http.Request) {
+	var quest model.Quest
+
+	if err := json.NewDecoder(r.Body).Decode(&quest); err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+	err := repo.UpdateQuestReward(quest)
+
+	if err != nil {
+		fmt.Fprintf(w, "success")
+	}
+}
+
+func TakeQuest(w http.ResponseWriter, r *http.Request) {
+	var takeByRequest model.TakenBy
+
+	if err := json.NewDecoder(r.Body).Decode(&takeByRequest); err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+	err := usecase.TakeQuest(takeByRequest.QuestID, takeByRequest.AdventurerID)
+
+	if err != nil {
+		fmt.Fprintf(w, "success")
+	}
+}
+
+func ReportQuest(w http.ResponseWriter, r *http.Request) {
+	var takeByRequest model.TakenBy
+
+	if err := json.NewDecoder(r.Body).Decode(&takeByRequest); err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+	err := usecase.ReportQuest(takeByRequest.QuestID, takeByRequest.AdventurerID)
+
+	if err != nil {
+		fmt.Fprintf(w, "success")
 	}
 }

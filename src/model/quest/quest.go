@@ -16,3 +16,8 @@ type GetQuestByStatus struct {
 	MinimumRank  int32  `json:"minimum_rank"`
 	RewardNumber int32  `json:"reward_number"`
 }
+
+type TakenBy struct {
+	QuestID      int64 `json:"quest_id"`
+	AdventurerID int64 `json:"adv_id"`
+}
