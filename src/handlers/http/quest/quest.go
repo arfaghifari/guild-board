@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	model "github.com/arfaghifari/guild-board/src/model/quest"
-	repo "github.com/arfaghifari/guild-board/src/repository/quest"
 	usecase "github.com/arfaghifari/guild-board/src/usecase/quest"
 )
 
@@ -22,127 +21,153 @@ type GetQuestByStatusResponse struct {
 	Data   []model.GetQuestByStatus `json:"data"`
 }
 
+type Handlers interface {
+	GetQuestByStatus(http.ResponseWriter, *http.Request)
+	CreateQuest(http.ResponseWriter, *http.Request)
+	DeleteQuest(http.ResponseWriter, *http.Request)
+	UpdateQuestRank(http.ResponseWriter, *http.Request)
+	UpdateQuestReward(http.ResponseWriter, *http.Request)
+	TakeQuest(http.ResponseWriter, *http.Request)
+	ReportQuest(http.ResponseWriter, *http.Request)
+}
+
+type handlers struct {
+	usecase usecase.Usecase
+}
+
+func NewHandlers() (Handlers, error) {
+	usecase, _ := usecase.NewUsecase()
+
+	return &handlers{usecase}, nil
+}
+
 func GetHello(w http.ResponseWriter, r *http.Request) {
 	log.Println("Hello World")
 	fmt.Fprintf(w, "HELLO NAKAMA")
 }
 
-func GetQuestByStatus(w http.ResponseWriter, r *http.Request) {
-	status, _ := strconv.Atoi(r.URL.Query().Get("status"))
-	log.Println(r.URL.Query().Get("status"))
-	if status == 0 {
-		res, err := repo.GetAllAvailableQuest()
-		if err != nil {
-			return
-		}
-		resp, _ := json.Marshal(GetQuestByStatusResponse{
-			Header: Header{
-				Error:      "",
-				StatusCode: 200,
-			},
-			Data: res,
-		})
-
-		w.Write(resp)
+func (h *handlers) GetQuestByStatus(w http.ResponseWriter, r *http.Request) {
+	status, err := strconv.Atoi(r.URL.Query().Get("status"))
+	if err != nil {
+		http.Error(w, "bad request", 400)
+		return
 	}
-
-	if status == 1 {
-		res, err := repo.GetAllCompletedQuest()
-		if err != nil {
-			return
-		}
-		resp, _ := json.Marshal(GetQuestByStatusResponse{
-			Header: Header{
-				Error:      "",
-				StatusCode: 200,
-			},
-			Data: res,
-		})
-
-		w.Write(resp)
+	res, err := h.usecase.GetQuestByStatus(int32(status))
+	if err != nil {
+		http.Error(w, "internal server error", 500)
+		return
 	}
+	resp, _ := json.Marshal(GetQuestByStatusResponse{
+		Header: Header{
+			Error:      "",
+			StatusCode: 200,
+		},
+		Data: res,
+	})
+
+	w.Write(resp)
+
 }
 
-func CreateQuest(w http.ResponseWriter, r *http.Request) {
+func (h *handlers) CreateQuest(w http.ResponseWriter, r *http.Request) {
 	var quest model.Quest
 
 	if err := json.NewDecoder(r.Body).Decode(&quest); err != nil {
 		http.Error(w, "bad request", 400)
 		return
 	}
-	err := repo.CreateQuest(quest)
+	err := h.usecase.CreateQuest(quest)
 
 	if err != nil {
-		fmt.Fprintf(w, "success")
+		http.Error(w, "internal server error", 500)
+		return
 	}
+
+	fmt.Fprintf(w, "success")
+
 }
 
-func DeleteQuest(w http.ResponseWriter, r *http.Request) {
+func (h *handlers) DeleteQuest(w http.ResponseWriter, r *http.Request) {
 	var quest model.Quest
 
 	if err := json.NewDecoder(r.Body).Decode(&quest); err != nil {
 		http.Error(w, "bad request", 400)
 		return
 	}
-	err := repo.DeleteQuest(quest)
+	err := h.usecase.DeleteQuest(quest)
 
 	if err != nil {
-		fmt.Fprintf(w, "success")
+		http.Error(w, "internal server error", 500)
+		return
 	}
+
+	fmt.Fprintf(w, "success")
 }
 
-func UpdateQuestRank(w http.ResponseWriter, r *http.Request) {
+func (h *handlers) UpdateQuestRank(w http.ResponseWriter, r *http.Request) {
 	var quest model.Quest
 
 	if err := json.NewDecoder(r.Body).Decode(&quest); err != nil {
 		http.Error(w, "bad request", 400)
 		return
 	}
-	err := repo.UpdateQuestRank(quest)
+	err := h.usecase.UpdateQuestRank(quest)
 
 	if err != nil {
-		fmt.Fprintf(w, "success")
+		http.Error(w, "internal server error", 500)
+		return
 	}
+
+	fmt.Fprintf(w, "success")
 }
 
-func UpdateQuestReward(w http.ResponseWriter, r *http.Request) {
+func (h *handlers) UpdateQuestReward(w http.ResponseWriter, r *http.Request) {
 	var quest model.Quest
 
 	if err := json.NewDecoder(r.Body).Decode(&quest); err != nil {
 		http.Error(w, "bad request", 400)
 		return
 	}
-	err := repo.UpdateQuestReward(quest)
+	err := h.usecase.UpdateQuestReward(quest)
 
 	if err != nil {
-		fmt.Fprintf(w, "success")
+		http.Error(w, "internal server error", 500)
+		return
 	}
+
+	fmt.Fprintf(w, "success")
 }
 
-func TakeQuest(w http.ResponseWriter, r *http.Request) {
+func (h *handlers) TakeQuest(w http.ResponseWriter, r *http.Request) {
 	var takeByRequest model.TakenBy
 
 	if err := json.NewDecoder(r.Body).Decode(&takeByRequest); err != nil {
 		http.Error(w, "bad request", 400)
 		return
 	}
-	err := usecase.TakeQuest(takeByRequest.QuestID, takeByRequest.AdventurerID)
+	err := h.usecase.TakeQuest(takeByRequest.QuestID, takeByRequest.AdventurerID)
 
 	if err != nil {
-		fmt.Fprintf(w, "success")
+		http.Error(w, "internal server error", 500)
+		return
 	}
+
+	fmt.Fprintf(w, "success")
 }
 
-func ReportQuest(w http.ResponseWriter, r *http.Request) {
+func (h *handlers) ReportQuest(w http.ResponseWriter, r *http.Request) {
 	var reportQuest model.ReportQuest
 
 	if err := json.NewDecoder(r.Body).Decode(&reportQuest); err != nil {
 		http.Error(w, "bad request", 400)
 		return
 	}
-	err := usecase.ReportQuest(reportQuest.QuestID, reportQuest.AdventurerID, reportQuest.IsCompleted)
+	err := h.usecase.ReportQuest(reportQuest.QuestID, reportQuest.AdventurerID, reportQuest.IsCompleted)
 
 	if err != nil {
-		fmt.Fprintf(w, "success")
+		http.Error(w, "internal server error", 500)
+		return
 	}
+
+	fmt.Fprintf(w, "success")
 }
