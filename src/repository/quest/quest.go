@@ -41,11 +41,16 @@ func (r *repository) GetAllCompletedQuest() (quests []model.GetQuestByStatus, er
 	query := `
 	SELECT quest_id, name, description, minimum_rank, reward_number
 	FROM quest
-	WHERE status = 2
+	WHERE status = $1
 	`
-
+	completedStatus := 2
 	quests = []model.GetQuestByStatus{}
-	rows, err := db.Query(query)
+	rows, err := db.Query(query, completedStatus)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
 	for rows.Next() {
 		quest := model.GetQuestByStatus{}
 		if err = rows.Scan(&quest.ID, &quest.Name, &quest.Description, &quest.MinimumRank, &quest.RewardNumber); err != nil {
@@ -53,7 +58,7 @@ func (r *repository) GetAllCompletedQuest() (quests []model.GetQuestByStatus, er
 		}
 		quests = append(quests, quest)
 	}
-	defer rows.Close()
+
 	return
 }
 
@@ -63,11 +68,16 @@ func (r *repository) GetAllAvailableQuest() (quests []model.GetQuestByStatus, er
 	query := `
 	SELECT quest_id, name, description, minimum_rank, reward_number
 	FROM quest
-	WHERE status = 0
+	WHERE status = $1
 	`
-
+	availableStatus := 0
 	quests = []model.GetQuestByStatus{}
-	rows, err := db.Query(query)
+	rows, err := db.Query(query, availableStatus)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
 	for rows.Next() {
 		quest := model.GetQuestByStatus{}
 		if err = rows.Scan(&quest.ID, &quest.Name, &quest.Description, &quest.MinimumRank, &quest.RewardNumber); err != nil {
@@ -75,7 +85,7 @@ func (r *repository) GetAllAvailableQuest() (quests []model.GetQuestByStatus, er
 		}
 		quests = append(quests, quest)
 	}
-	defer rows.Close()
+
 	return
 }
 
@@ -152,6 +162,7 @@ func (r *repository) GetQuest(id int64) (quest model.Quest, err error) {
 	query := `SELECT name, description, minimum_rank, reward_number, status 
 	FROM quest
 	WHERE quest_id = $1`
+	quest.ID = id
 	err = db.QueryRow(query, id).Scan(&quest.Name, &quest.Description, &quest.MinimumRank, &quest.RewardNumber, &quest.Status)
 	return
 }
