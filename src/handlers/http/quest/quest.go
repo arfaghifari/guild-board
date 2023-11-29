@@ -77,7 +77,7 @@ func (h *handlers) GetQuestByStatus(w http.ResponseWriter, r *http.Request) {
 		resp.Header.Error = err.Error()
 		return
 	}
-	if status != 0 && status != 1 {
+	if status != 0 && status != 2 {
 		resp.Header.Error = "Invalid status number"
 		return
 	}
