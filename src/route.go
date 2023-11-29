@@ -20,9 +20,9 @@ func Main() {
 	questHandlers, _ := qstHandlers.NewHandlers()
 	adventurerHandlers, _ := advHandlers.NewHandlers()
 	// routes http
-	router.HandleFunc("/get-hello", qstHandlers.GetHello).Methods(http.MethodGet)
+	router.HandleFunc("/hello", qstHandlers.GetHello).Methods(http.MethodGet)
 
-	router.HandleFunc("/get-quest-status", questHandlers.GetQuestByStatus).Methods(http.MethodGet)
+	router.HandleFunc("/quest-status", questHandlers.GetQuestByStatus).Methods(http.MethodGet)
 	router.HandleFunc("/quest", questHandlers.CreateQuest).Methods(http.MethodPost)
 	router.HandleFunc("/quest", questHandlers.DeleteQuest).Methods(http.MethodDelete)
 	router.HandleFunc("/quest-rank", questHandlers.UpdateQuestRank).Methods(http.MethodPatch)
