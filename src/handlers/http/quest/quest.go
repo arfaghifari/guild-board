@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	constant "github.com/arfaghifari/guild-board/src/constant"
 	model "github.com/arfaghifari/guild-board/src/model/quest"
 	usecase "github.com/arfaghifari/guild-board/src/usecase/quest"
 )
@@ -77,7 +78,7 @@ func (h *handlers) GetQuestByStatus(w http.ResponseWriter, r *http.Request) {
 		resp.Header.Error = err.Error()
 		return
 	}
-	if status != 0 && status != 2 {
+	if status != constant.AvailableQuest && status != constant.CompletedQuest {
 		resp.Header.Error = "Invalid status number"
 		return
 	}

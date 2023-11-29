@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	constant "github.com/arfaghifari/guild-board/src/constant"
 	model "github.com/arfaghifari/guild-board/src/model/quest"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,7 +28,7 @@ var bulkQuest = []model.Quest{
 		Description:  "menyelamatkan kucing yang terjebak di atas pohon",
 		MinimumRank:  11,
 		RewardNumber: 200000,
-		Status:       0,
+		Status:       constant.AvailableQuest,
 	},
 	{
 		ID:           2,
@@ -35,7 +36,7 @@ var bulkQuest = []model.Quest{
 		Description:  "membersihkan selokan penuh dengan lumut",
 		MinimumRank:  11,
 		RewardNumber: 200000,
-		Status:       0,
+		Status:       constant.AvailableQuest,
 	},
 	{
 		ID:           3,
@@ -43,7 +44,7 @@ var bulkQuest = []model.Quest{
 		Description:  "Mengantar pulang pergi dan keliling kota, Jakarta-Bandung, Sudah di kasih makan",
 		MinimumRank:  13,
 		RewardNumber: 600000,
-		Status:       2,
+		Status:       constant.CompletedQuest,
 	},
 }
 
@@ -53,7 +54,7 @@ func TestGetAllCompletedQuest(t *testing.T) {
 	defer func() {
 		repo.Close()
 	}()
-	completedStatus := 2
+	completedStatus := constant.CompletedQuest
 	query := regexp.QuoteMeta("SELECT quest_id, name, description, minimum_rank, reward_number FROM quest WHERE status = $1")
 	rows := sqlmock.NewRows([]string{"quest_id", "name", "description", "minimum_rank", "reward_number"}).
 		AddRow(bulkQuest[2].ID, bulkQuest[2].Name, bulkQuest[2].Description, bulkQuest[2].MinimumRank, bulkQuest[2].RewardNumber)
@@ -72,7 +73,7 @@ func TestGetAllAvailabeTest(t *testing.T) {
 	defer func() {
 		repo.Close()
 	}()
-	availableStastus := 0
+	availableStastus := constant.AvailableQuest
 	query := regexp.QuoteMeta("SELECT quest_id, name, description, minimum_rank, reward_number FROM quest WHERE status = $1")
 	rows := sqlmock.NewRows([]string{"quest_id", "name", "description", "minimum_rank", "reward_number"}).
 		AddRow(bulkQuest[0].ID, bulkQuest[0].Name, bulkQuest[0].Description, bulkQuest[0].MinimumRank, bulkQuest[0].RewardNumber).

@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
+	constant "github.com/arfaghifari/guild-board/src/constant"
 	modelAdv "github.com/arfaghifari/guild-board/src/model/adventurer"
 	model "github.com/arfaghifari/guild-board/src/model/quest"
 	usecase "github.com/arfaghifari/guild-board/src/usecase/quest"
@@ -30,7 +32,7 @@ var bulkQuest = []model.Quest{
 		Description:  "menyelamatkan kucing yang terjebak di atas pohon",
 		MinimumRank:  11,
 		RewardNumber: 200000,
-		Status:       0,
+		Status:       constant.AvailableQuest,
 	},
 	{
 		ID:           2,
@@ -38,7 +40,7 @@ var bulkQuest = []model.Quest{
 		Description:  "membersihkan selokan penuh dengan lumut",
 		MinimumRank:  12,
 		RewardNumber: 200000,
-		Status:       0,
+		Status:       constant.AvailableQuest,
 	},
 	{
 		ID:           3,
@@ -46,7 +48,7 @@ var bulkQuest = []model.Quest{
 		Description:  "Mengantar pulang pergi dan keliling kota, Jakarta-Bandung, Sudah di kasih makan",
 		MinimumRank:  13,
 		RewardNumber: 600000,
-		Status:       2,
+		Status:       constant.CompletedQuest,
 	},
 }
 
@@ -94,14 +96,15 @@ func TestGetQuestByStatus(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockUsecase := usecase.NewMockUsecase(mockCtrl)
 	testHandlers := &handlers{usecase: mockUsecase}
-	mockUsecase.EXPECT().GetQuestByStatus(int32(0)).Return(bulkQuestByStatus[0:1], nil).Times(1)
+	mockUsecase.EXPECT().GetQuestByStatus(int32(constant.AvailableQuest)).Return(bulkQuestByStatus[0:1], nil).Times(1)
 	ctx := context.Background()
 	router := mux.NewRouter()
 	router.HandleFunc("/quest-status", testHandlers.GetQuestByStatus).Methods(http.MethodGet)
 	recorder := httptest.NewRecorder()
 	request, _ := http.NewRequest("GET", "/quest-status", strings.NewReader(``))
 	values := request.URL.Query()
-	values.Add("status", "0")
+
+	values.Add("status", strconv.Itoa(constant.AvailableQuest))
 	request.URL.RawQuery = values.Encode()
 	request = request.WithContext(ctx)
 	router.ServeHTTP(recorder, request)
@@ -116,14 +119,14 @@ func TestGetQuestByStatusC(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockUsecase := usecase.NewMockUsecase(mockCtrl)
 	testHandlers := &handlers{usecase: mockUsecase}
-	mockUsecase.EXPECT().GetQuestByStatus(int32(2)).Return(bulkQuestByStatus[2:], nil).Times(1)
+	mockUsecase.EXPECT().GetQuestByStatus(int32(constant.CompletedQuest)).Return(bulkQuestByStatus[2:], nil).Times(1)
 	ctx := context.Background()
 	router := mux.NewRouter()
 	router.HandleFunc("/quest-status", testHandlers.GetQuestByStatus).Methods(http.MethodGet)
 	recorder := httptest.NewRecorder()
 	request, _ := http.NewRequest("GET", "/quest-status", strings.NewReader(``))
 	values := request.URL.Query()
-	values.Add("status", "2")
+	values.Add("status", strconv.Itoa(constant.CompletedQuest))
 	request.URL.RawQuery = values.Encode()
 	request = request.WithContext(ctx)
 	router.ServeHTTP(recorder, request)

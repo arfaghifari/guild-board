@@ -3,6 +3,7 @@ package quest
 import (
 	"database/sql"
 
+	constant "github.com/arfaghifari/guild-board/src/constant"
 	"github.com/arfaghifari/guild-board/src/database"
 	model "github.com/arfaghifari/guild-board/src/model/quest"
 )
@@ -43,7 +44,7 @@ func (r *repository) GetAllCompletedQuest() (quests []model.GetQuestByStatus, er
 	FROM quest
 	WHERE status = $1
 	`
-	completedStatus := 2
+	completedStatus := constant.CompletedQuest
 	quests = []model.GetQuestByStatus{}
 	rows, err := db.Query(query, completedStatus)
 	if err != nil {
@@ -70,7 +71,7 @@ func (r *repository) GetAllAvailableQuest() (quests []model.GetQuestByStatus, er
 	FROM quest
 	WHERE status = $1
 	`
-	availableStatus := 0
+	availableStatus := constant.AvailableQuest
 	quests = []model.GetQuestByStatus{}
 	rows, err := db.Query(query, availableStatus)
 	if err != nil {

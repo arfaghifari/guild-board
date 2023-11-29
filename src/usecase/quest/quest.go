@@ -3,6 +3,7 @@ package quest
 import (
 	"errors"
 
+	constant "github.com/arfaghifari/guild-board/src/constant"
 	model "github.com/arfaghifari/guild-board/src/model/quest"
 	repoAdv "github.com/arfaghifari/guild-board/src/repository/adventurer"
 	repo "github.com/arfaghifari/guild-board/src/repository/quest"
@@ -31,7 +32,7 @@ func NewUsecase() (Usecase, error) {
 }
 
 func (u *usecase) GetQuestByStatus(status int32) ([]model.GetQuestByStatus, error) {
-	if status == 0 {
+	if status == constant.AvailableQuest {
 		return u.repo.GetAllAvailableQuest()
 	} else {
 		return u.repo.GetAllCompletedQuest()
@@ -59,7 +60,7 @@ func (u *usecase) TakeQuest(quest_id, adventurer_id int64) error {
 	if err != nil {
 		return err
 	}
-	if quest.Status != 0 {
+	if quest.Status != constant.AvailableQuest {
 		return errors.New("quest have been taken")
 	}
 	adv, err := u.repoAdv.GetAdventurer(adventurer_id)
@@ -73,7 +74,7 @@ func (u *usecase) TakeQuest(quest_id, adventurer_id int64) error {
 	if err != nil {
 		return err
 	}
-	quest.Status = 1
+	quest.Status = constant.WorkingQuest
 	err = u.repo.UpdateQuestStatus(quest)
 
 	return err
@@ -83,7 +84,7 @@ func (u *usecase) ReportQuest(quest_id, adventurer_id int64, is bool) error {
 	if !is {
 		quest := model.Quest{
 			ID:     quest_id,
-			Status: 0,
+			Status: constant.AvailableQuest,
 		}
 		return u.repo.UpdateQuestStatus(quest)
 	} else {
@@ -93,7 +94,7 @@ func (u *usecase) ReportQuest(quest_id, adventurer_id int64, is bool) error {
 		}
 		quest := model.Quest{
 			ID:     quest_id,
-			Status: 2,
+			Status: constant.CompletedQuest,
 		}
 		err = u.repo.UpdateQuestStatus(quest)
 		return err

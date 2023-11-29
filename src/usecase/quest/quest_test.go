@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	constant "github.com/arfaghifari/guild-board/src/constant"
 	modelAdv "github.com/arfaghifari/guild-board/src/model/adventurer"
 	model "github.com/arfaghifari/guild-board/src/model/quest"
 	advRepo "github.com/arfaghifari/guild-board/src/repository/adventurer"
@@ -26,7 +27,7 @@ var bulkQuest = []model.Quest{
 		Description:  "menyelamatkan kucing yang terjebak di atas pohon",
 		MinimumRank:  11,
 		RewardNumber: 200000,
-		Status:       0,
+		Status:       constant.AvailableQuest,
 	},
 	{
 		ID:           2,
@@ -34,7 +35,7 @@ var bulkQuest = []model.Quest{
 		Description:  "membersihkan selokan penuh dengan lumut",
 		MinimumRank:  12,
 		RewardNumber: 200000,
-		Status:       0,
+		Status:       constant.AvailableQuest,
 	},
 	{
 		ID:           3,
@@ -42,7 +43,7 @@ var bulkQuest = []model.Quest{
 		Description:  "Mengantar pulang pergi dan keliling kota, Jakarta-Bandung, Sudah di kasih makan",
 		MinimumRank:  13,
 		RewardNumber: 600000,
-		Status:       2,
+		Status:       constant.CompletedQuest,
 	},
 }
 
