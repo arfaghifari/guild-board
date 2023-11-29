@@ -3,7 +3,6 @@ package quest
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -109,7 +108,6 @@ func TestGetQuestByStatus(t *testing.T) {
 	assert.Equal(t, http.StatusOK, recorder.Code, "error code")
 	var bulk GetQuestByStatusResponse
 	json.Unmarshal(recorder.Body.Bytes(), &bulk)
-	log.Printf("status like %v", request.URL.Query().Get("status"))
 	assert.Equal(t, bulkQuestByStatus[0:1], bulk.Data)
 }
 
@@ -130,10 +128,9 @@ func TestGetQuestByStatusC(t *testing.T) {
 	request = request.WithContext(ctx)
 	router.ServeHTTP(recorder, request)
 	assert.Equal(t, http.StatusOK, recorder.Code, "error code")
-	var bulk GetQuestByStatusResponse
-	json.Unmarshal(recorder.Body.Bytes(), &bulk)
-	log.Printf("status like %v", request.URL.Query().Get("status"))
-	assert.Equal(t, bulkQuestByStatus[2:], bulk.Data)
+	var resp GetQuestByStatusResponse
+	assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
+	assert.Equal(t, bulkQuestByStatus[2:], resp.Data, resp.Header.Error)
 }
 
 func TestCreateQuest(t *testing.T) {
@@ -151,8 +148,10 @@ func TestCreateQuest(t *testing.T) {
 	request, _ := http.NewRequest("POST", "/quest", strings.NewReader(`{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11, "reward_number" : 200000}`))
 	request = request.WithContext(ctx)
 	router.ServeHTTP(recorder, request)
+	var resp MessageResponse
+	assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
 	assert.Equal(t, http.StatusOK, recorder.Code, "error code")
-	assert.Equal(t, "success", string(recorder.Body.String()))
+	assert.Equal(t, SuccesMessage{true}, resp.Data)
 }
 
 func TestUpdateRankQuest(t *testing.T) {
@@ -172,8 +171,10 @@ func TestUpdateRankQuest(t *testing.T) {
 	request, _ := http.NewRequest("PATCH", "/quest-rank", strings.NewReader(`{"quest_id": 1, "minimum_rank" : 12}`))
 	request = request.WithContext(ctx)
 	router.ServeHTTP(recorder, request)
+	var resp MessageResponse
+	assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
 	assert.Equal(t, http.StatusOK, recorder.Code, "error code")
-	assert.Equal(t, "success", string(recorder.Body.String()))
+	assert.Equal(t, SuccesMessage{true}, resp.Data)
 }
 
 func TestUpdateRewardQuest(t *testing.T) {
@@ -193,8 +194,10 @@ func TestUpdateRewardQuest(t *testing.T) {
 	request, _ := http.NewRequest("PATCH", "/quest-reward", strings.NewReader(`{"quest_id": 1, "reward_number" : 250000}`))
 	request = request.WithContext(ctx)
 	router.ServeHTTP(recorder, request)
+	var resp MessageResponse
+	assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
 	assert.Equal(t, http.StatusOK, recorder.Code, "error code")
-	assert.Equal(t, "success", string(recorder.Body.String()))
+	assert.Equal(t, SuccesMessage{true}, resp.Data)
 }
 
 func TestTakeQuest(t *testing.T) {
@@ -210,8 +213,10 @@ func TestTakeQuest(t *testing.T) {
 	request, _ := http.NewRequest("POST", "/take-quest", strings.NewReader(`{"quest_id": 1, "adv_id" : 1}`))
 	request = request.WithContext(ctx)
 	router.ServeHTTP(recorder, request)
+	var resp MessageResponse
+	assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
 	assert.Equal(t, http.StatusOK, recorder.Code, "error code")
-	assert.Equal(t, "success", string(recorder.Body.String()))
+	assert.Equal(t, SuccesMessage{true}, resp.Data)
 }
 
 func TestReportQuest(t *testing.T) {
@@ -227,8 +232,10 @@ func TestReportQuest(t *testing.T) {
 	request, _ := http.NewRequest("POST", "/report-quest", strings.NewReader(`{"quest_id": 1, "adv_id" : 1, "is_completed" : true}`))
 	request = request.WithContext(ctx)
 	router.ServeHTTP(recorder, request)
+	var resp MessageResponse
+	assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
 	assert.Equal(t, http.StatusOK, recorder.Code, "error code")
-	assert.Equal(t, "success", string(recorder.Body.String()))
+	assert.Equal(t, SuccesMessage{true}, resp.Data)
 }
 
 func TestReportQuestF(t *testing.T) {
@@ -244,6 +251,8 @@ func TestReportQuestF(t *testing.T) {
 	request, _ := http.NewRequest("POST", "/report-quest", strings.NewReader(`{"quest_id": 1, "adv_id" : 1, "is_completed" : false}`))
 	request = request.WithContext(ctx)
 	router.ServeHTTP(recorder, request)
+	var resp MessageResponse
+	assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
 	assert.Equal(t, http.StatusOK, recorder.Code, "error code")
-	assert.Equal(t, "success", string(recorder.Body.String()))
+	assert.Equal(t, SuccesMessage{true}, resp.Data)
 }

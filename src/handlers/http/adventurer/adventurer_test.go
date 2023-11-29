@@ -2,6 +2,7 @@ package adventurer
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -36,8 +37,10 @@ func TestCreateAdventurer(t *testing.T) {
 	request, _ := http.NewRequest("POST", "/adventurer", strings.NewReader(`{"name" : "andi", "rank" : 11 }`))
 	request = request.WithContext(ctx)
 	router.ServeHTTP(recorder, request)
+	var resp MessageResponse
+	assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
 	assert.Equal(t, http.StatusOK, recorder.Code, "error code")
-	assert.Equal(t, "success", string(recorder.Body.String()))
+	assert.Equal(t, SuccesMessage{true}, resp.Data)
 }
 
 func TestUpdateAdventureRank(t *testing.T) {
@@ -54,6 +57,8 @@ func TestUpdateAdventureRank(t *testing.T) {
 	request, _ := http.NewRequest("PATCH", "/adventurer-rank", strings.NewReader(`{"id" : 1, "rank" : 12 }`))
 	request = request.WithContext(ctx)
 	router.ServeHTTP(recorder, request)
+	var resp MessageResponse
+	assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
 	assert.Equal(t, http.StatusOK, recorder.Code, "error code")
-	assert.Equal(t, "success", string(recorder.Body.String()))
+	assert.Equal(t, SuccesMessage{true}, resp.Data)
 }
