@@ -29,7 +29,7 @@ func Main() {
 	router.HandleFunc("/quest-reward", questHandlers.UpdateQuestReward).Methods(http.MethodPatch)
 
 	router.HandleFunc("/adventurer", adventurerHandlers.CreateAdventurer).Methods(http.MethodPost)
-	router.HandleFunc("/adventurer", adventurerHandlers.UpdateAdventurerRank).Methods(http.MethodPatch)
+	router.HandleFunc("/adventurer-rank", adventurerHandlers.UpdateAdventurerRank).Methods(http.MethodPatch)
 
 	router.HandleFunc("/take-quest", questHandlers.TakeQuest).Methods(http.MethodPost)
 	router.HandleFunc("/done-quest", questHandlers.ReportQuest).Methods(http.MethodPost)

@@ -33,7 +33,7 @@ func (h *handlers) CreateAdventurer(w http.ResponseWriter, r *http.Request) {
 	}
 	err := h.usecase.CreateAdventurer(adventurer)
 
-	if err != nil {
+	if err == nil {
 		fmt.Fprintf(w, "success")
 	}
 }
@@ -47,7 +47,7 @@ func (h *handlers) UpdateAdventurerRank(w http.ResponseWriter, r *http.Request) 
 	}
 	err := h.usecase.UpdateAdventurerRank(adventurer)
 
-	if err != nil {
+	if err == nil {
 		fmt.Fprintf(w, "success")
 	}
 }
