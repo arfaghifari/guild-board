@@ -38,20 +38,20 @@ func (u *usecase) GetQuestByStatus(status int32) ([]model.GetQuestByStatus, erro
 	}
 }
 
-func (u *usecase) CreateQuest(model.Quest) error {
-	return u.repo.CreateQuest(model.Quest{})
+func (u *usecase) CreateQuest(quest model.Quest) error {
+	return u.repo.CreateQuest(quest)
 }
 
-func (u *usecase) DeleteQuest(model.Quest) error {
-	return u.repo.DeleteQuest(model.Quest{})
+func (u *usecase) DeleteQuest(quest model.Quest) error {
+	return u.repo.DeleteQuest(quest)
 }
 
-func (u *usecase) UpdateQuestReward(model.Quest) error {
-	return u.repo.UpdateQuestReward(model.Quest{})
+func (u *usecase) UpdateQuestReward(quest model.Quest) error {
+	return u.repo.UpdateQuestReward(quest)
 }
 
-func (u *usecase) UpdateQuestRank(model.Quest) error {
-	return u.repo.UpdateQuestRank(model.Quest{})
+func (u *usecase) UpdateQuestRank(quest model.Quest) error {
+	return u.repo.UpdateQuestRank(quest)
 }
 
 func (u *usecase) TakeQuest(quest_id, adventurer_id int64) error {
