@@ -61,6 +61,7 @@ func (h *handlers) GetQuestByStatus(w http.ResponseWriter, r *http.Request) {
 		statusCode = http.StatusBadRequest
 		resp       GetQuestByStatusResponse
 	)
+	resp.Data = []model.GetQuestByStatus{}
 	defer func() {
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
