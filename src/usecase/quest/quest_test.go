@@ -74,146 +74,491 @@ var bulkQuestByStatus = []model.GetQuestByStatus{
 func TestCreateQuest(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo}
-	mockRepo.EXPECT().CreateQuest(bulkQuest[0]).Return(nil).Times(1)
-	err := testUsecase.CreateQuest(bulkQuest[0])
-	assert.Nil(t, err)
-}
 
-func TestUpdateQuestReward(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo}
-	mockRepo.EXPECT().UpdateQuestReward(bulkQuest[0]).Return(nil).Times(1)
-	err := testUsecase.UpdateQuestReward(bulkQuest[0])
-	assert.Nil(t, err)
+	type fields struct {
+		r *repo.MockRepository
+	}
+	type args struct {
+		quest model.Quest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func(*repo.MockRepository)
+		wantErr bool
+	}{
+		{
+			name: "success created a quest",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func(repo *repo.MockRepository) {
+				repo.EXPECT().CreateQuest(bulkQuest[0]).Return(nil).Times(1)
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := &usecase{
+				repo: tt.fields.r,
+			}
+			tt.mock(tt.fields.r)
+			err := u.CreateQuest(tt.args.quest)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
 }
 
 func TestUpdateQuestRank(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo}
-	mockRepo.EXPECT().UpdateQuestRank(bulkQuest[0]).Return(nil).Times(1)
-	err := testUsecase.UpdateQuestRank(bulkQuest[0])
-	assert.Nil(t, err)
+
+	type fields struct {
+		r *repo.MockRepository
+	}
+	type args struct {
+		quest model.Quest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func(*repo.MockRepository)
+		wantErr bool
+	}{
+		{
+			name: "success updated a quest rank",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func(repo *repo.MockRepository) {
+				repo.EXPECT().UpdateQuestRank(bulkQuest[0]).Return(nil).Times(1)
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := &usecase{
+				repo: tt.fields.r,
+			}
+			tt.mock(tt.fields.r)
+			err := u.UpdateQuestRank(tt.args.quest)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
+}
+
+func TestUpdateQuestReward(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	type fields struct {
+		r *repo.MockRepository
+	}
+	type args struct {
+		quest model.Quest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func(*repo.MockRepository)
+		wantErr bool
+	}{
+		{
+			name: "success updated a quest reward",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func(repo *repo.MockRepository) {
+				repo.EXPECT().UpdateQuestReward(bulkQuest[0]).Return(nil).Times(1)
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := &usecase{
+				repo: tt.fields.r,
+			}
+			tt.mock(tt.fields.r)
+			err := u.UpdateQuestReward(tt.args.quest)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
 }
 
 func TestDeleteQuest(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo}
-	mockRepo.EXPECT().DeleteQuest(bulkQuest[0]).Return(nil).Times(1)
-	err := testUsecase.DeleteQuest(bulkQuest[0])
-	assert.Nil(t, err)
+
+	type fields struct {
+		r *repo.MockRepository
+	}
+	type args struct {
+		quest model.Quest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func(*repo.MockRepository)
+		wantErr bool
+	}{
+		{
+			name: "success deleted a quest",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func(repo *repo.MockRepository) {
+				repo.EXPECT().DeleteQuest(bulkQuest[0]).Return(nil).Times(1)
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := &usecase{
+				repo: tt.fields.r,
+			}
+			tt.mock(tt.fields.r)
+			err := u.DeleteQuest(tt.args.quest)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
 }
 
-func TestGetQuestByStatusA(t *testing.T) {
+func TestGetQuestByStatus(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo}
-	mockRepo.EXPECT().GetAllAvailableQuest().Return(bulkQuestByStatus[0:1], nil).Times(1)
-	res, err := testUsecase.GetQuestByStatus(0)
-	assert.Equal(t, bulkQuestByStatus[0:1], res)
-	assert.Nil(t, err)
-}
 
-func TestGetQuestByStatusC(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo}
-	mockRepo.EXPECT().GetAllCompletedQuest().Return(bulkQuestByStatus[2:], nil).Times(1)
-	res, err := testUsecase.GetQuestByStatus(2)
-	assert.Equal(t, bulkQuestByStatus[2:], res)
-	assert.Nil(t, err)
+	type fields struct {
+		r *repo.MockRepository
+	}
+	type args struct {
+		status int32
+	}
+	tests := []struct {
+		name     string
+		fields   fields
+		args     args
+		mock     func(*repo.MockRepository)
+		outQuest []model.GetQuestByStatus
+		outLen   int
+		wantErr  bool
+	}{
+		{
+			name: "success get empty available quest",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				status: constant.AvailableQuest,
+			},
+			mock: func(repo *repo.MockRepository) {
+				repo.EXPECT().GetAllAvailableQuest().Return([]model.GetQuestByStatus{}, nil).Times(1)
+			},
+			outLen:   0,
+			outQuest: []model.GetQuestByStatus{},
+			wantErr:  false,
+		},
+		{
+			name: "success get 1 available quest",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				status: constant.AvailableQuest,
+			},
+			mock: func(repo *repo.MockRepository) {
+				repo.EXPECT().GetAllAvailableQuest().Return(bulkQuestByStatus[:1], nil).Times(1)
+			},
+			outQuest: bulkQuestByStatus[:1],
+			outLen:   1,
+			wantErr:  false,
+		},
+		{
+			name: "success get 2 available quest",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				status: constant.AvailableQuest,
+			},
+			mock: func(repo *repo.MockRepository) {
+				repo.EXPECT().GetAllAvailableQuest().Return(bulkQuestByStatus[:2], nil).Times(1)
+			},
+			outQuest: bulkQuestByStatus[:2],
+			outLen:   2,
+			wantErr:  false,
+		},
+		{
+			name: "success get none completed quest",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				status: constant.CompletedQuest,
+			},
+			mock: func(repo *repo.MockRepository) {
+				repo.EXPECT().GetAllCompletedQuest().Return([]model.GetQuestByStatus{}, nil).Times(1)
+			},
+			outQuest: []model.GetQuestByStatus{},
+			outLen:   0,
+			wantErr:  false,
+		},
+		{
+			name: "success get 1 completed quest",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				status: constant.CompletedQuest,
+			},
+			mock: func(repo *repo.MockRepository) {
+				repo.EXPECT().GetAllCompletedQuest().Return(bulkQuestByStatus[2:], nil).Times(1)
+			},
+			outQuest: bulkQuestByStatus[2:],
+			outLen:   1,
+			wantErr:  false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := &usecase{
+				repo: tt.fields.r,
+			}
+			tt.mock(tt.fields.r)
+			res, err := u.GetQuestByStatus(tt.args.status)
+			assert.NotNil(t, res)
+			assert.Len(t, tt.outQuest, tt.outLen)
+			assert.Equal(t, tt.outQuest, res)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
 }
 
 func TestTakeQuest(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	mockAdvRepo := advRepo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo, repoAdv: mockAdvRepo}
-	mockRepo.EXPECT().GetQuest(int64(1)).Return(bulkQuest[0], nil).Times(1)
-	mockAdvRepo.EXPECT().GetAdventurer(int64(1)).Return(adv, nil).Times(1)
-	mockRepo.EXPECT().CreateTakenBy(int64(1), int64(1)).Return(nil).Times(1)
-	copyQuest := bulkQuest[0]
-	copyQuest.Status = 1
-	mockRepo.EXPECT().UpdateQuestStatus(copyQuest).Return(nil).Times(1)
-	err := testUsecase.TakeQuest(int64(1), int64(1))
-	assert.Nil(t, err)
+
+	type fields struct {
+		r *repo.MockRepository
+		a *advRepo.MockRepository
+	}
+	type args struct {
+		quest_id int64
+		adv_id   int64
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func(*repo.MockRepository, *advRepo.MockRepository)
+		wantErr bool
+	}{
+		{
+			name: "success took a quest",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+				a: advRepo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id: 1,
+				adv_id:   1,
+			},
+			mock: func(repo *repo.MockRepository, advRepo *advRepo.MockRepository) {
+				repo.EXPECT().GetQuest(int64(1)).Return(bulkQuest[0], nil).Times(1)
+				advRepo.EXPECT().GetAdventurer(int64(1)).Return(adv, nil).Times(1)
+				repo.EXPECT().CreateTakenBy(int64(1), int64(1)).Return(nil).Times(1)
+				copyQuest := bulkQuest[0]
+				copyQuest.Status = constant.WorkingQuest
+				repo.EXPECT().UpdateQuestStatus(copyQuest).Return(nil).Times(1)
+			},
+			wantErr: false,
+		},
+		{
+			name: "failed took a quest because taken",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+				a: advRepo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id: 3,
+				adv_id:   1,
+			},
+			mock: func(repo *repo.MockRepository, advRepo *advRepo.MockRepository) {
+				repo.EXPECT().GetQuest(int64(3)).Return(bulkQuest[2], nil).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "failed took a quest because not enough rank",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+				a: advRepo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id: 2,
+				adv_id:   1,
+			},
+			mock: func(repo *repo.MockRepository, advRepo *advRepo.MockRepository) {
+				repo.EXPECT().GetQuest(int64(2)).Return(bulkQuest[1], nil).Times(1)
+				advRepo.EXPECT().GetAdventurer(int64(1)).Return(adv, nil).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "failed took a quest because no quest",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+				a: advRepo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id: 1,
+				adv_id:   1,
+			},
+			mock: func(repo *repo.MockRepository, advRepo *advRepo.MockRepository) {
+				repo.EXPECT().GetQuest(int64(1)).Return(model.Quest{}, errors.New("err")).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "failed took a quest because no adv",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+				a: advRepo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id: 1,
+				adv_id:   1,
+			},
+			mock: func(repo *repo.MockRepository, advRepo *advRepo.MockRepository) {
+				repo.EXPECT().GetQuest(int64(1)).Return(bulkQuest[0], nil).Times(1)
+				advRepo.EXPECT().GetAdventurer(int64(1)).Return(modelAdv.Adventurer{}, errors.New("err")).Times(1)
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := &usecase{
+				repo:    tt.fields.r,
+				repoAdv: tt.fields.a,
+			}
+			tt.mock(tt.fields.r, tt.fields.a)
+			err := u.TakeQuest(tt.args.quest_id, tt.args.adv_id)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
 }
 
-func TestTakeQuestStatus(t *testing.T) {
+func TestReportQuest(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	mockAdvRepo := advRepo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo, repoAdv: mockAdvRepo}
-	mockRepo.EXPECT().GetQuest(int64(3)).Return(bulkQuest[2], nil).Times(1)
-	err := testUsecase.TakeQuest(int64(3), int64(1))
-	assert.NotNil(t, err)
-}
 
-func TestTakeQuestRank(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	mockAdvRepo := advRepo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo, repoAdv: mockAdvRepo}
-	mockRepo.EXPECT().GetQuest(int64(2)).Return(bulkQuest[1], nil).Times(1)
-	mockAdvRepo.EXPECT().GetAdventurer(int64(1)).Return(adv, nil).Times(1)
-	err := testUsecase.TakeQuest(int64(2), int64(1))
-	assert.NotNil(t, err)
-}
-
-func TestTakeQuestNoQuest(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	mockAdvRepo := advRepo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo, repoAdv: mockAdvRepo}
-	mockRepo.EXPECT().GetQuest(int64(1)).Return(model.Quest{}, errors.New("err")).Times(1)
-	err := testUsecase.TakeQuest(int64(1), int64(1))
-	assert.NotNil(t, err)
-}
-
-func TestTakeQuestNoAdv(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	mockAdvRepo := advRepo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo, repoAdv: mockAdvRepo}
-	mockRepo.EXPECT().GetQuest(int64(1)).Return(bulkQuest[0], nil).Times(1)
-	mockAdvRepo.EXPECT().GetAdventurer(int64(1)).Return(modelAdv.Adventurer{}, errors.New("err")).Times(1)
-	err := testUsecase.TakeQuest(int64(1), int64(1))
-	assert.NotNil(t, err)
-}
-
-func TestReportQuestIs(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	mockAdvRepo := advRepo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo, repoAdv: mockAdvRepo}
-	mockRepo.EXPECT().UpdateQuestStatus(model.Quest{ID: 1, Status: 2}).Return(nil).Times(1)
-	mockAdvRepo.EXPECT().AddCompletedQuest(int64(1)).Return(nil).Times(1)
-	err := testUsecase.ReportQuest(int64(1), int64(1), true)
-	assert.Nil(t, err)
-}
-
-func TestReportQuestNot(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockRepo := repo.NewMockRepository(mockCtrl)
-	mockAdvRepo := advRepo.NewMockRepository(mockCtrl)
-	testUsecase := &usecase{repo: mockRepo, repoAdv: mockAdvRepo}
-	mockRepo.EXPECT().UpdateQuestStatus(model.Quest{ID: 1, Status: 0}).Return(nil).Times(1)
-	err := testUsecase.ReportQuest(1, 1, false)
-	assert.Nil(t, err)
+	type fields struct {
+		r *repo.MockRepository
+		a *advRepo.MockRepository
+	}
+	type args struct {
+		quest_id     int64
+		adv_id       int64
+		is_completed bool
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func(*repo.MockRepository, *advRepo.MockRepository)
+		wantErr bool
+	}{
+		{
+			name: "report completed quest",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+				a: advRepo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     1,
+				adv_id:       1,
+				is_completed: true,
+			},
+			mock: func(repo *repo.MockRepository, advRepo *advRepo.MockRepository) {
+				repo.EXPECT().UpdateQuestStatus(model.Quest{ID: 1, Status: 2}).Return(nil).Times(1)
+				advRepo.EXPECT().AddCompletedQuest(int64(1)).Return(nil).Times(1)
+			},
+			wantErr: false,
+		},
+		{
+			name: "report uncompleted quest",
+			fields: fields{
+				r: repo.NewMockRepository(mockCtrl),
+				a: advRepo.NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     1,
+				adv_id:       1,
+				is_completed: false,
+			},
+			mock: func(repo *repo.MockRepository, advRepo *advRepo.MockRepository) {
+				repo.EXPECT().UpdateQuestStatus(model.Quest{ID: 1, Status: 0}).Return(nil).Times(1)
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := &usecase{
+				repo:    tt.fields.r,
+				repoAdv: tt.fields.a,
+			}
+			tt.mock(tt.fields.r, tt.fields.a)
+			err := u.ReportQuest(tt.args.quest_id, tt.args.adv_id, tt.args.is_completed)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
 }
