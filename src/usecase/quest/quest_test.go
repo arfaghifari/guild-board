@@ -105,6 +105,19 @@ func TestCreateQuest(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "failed created a quest",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func(repo *MockRepository) {
+				repo.EXPECT().CreateQuest(bulkQuest[0]).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -151,6 +164,19 @@ func TestUpdateQuestRank(t *testing.T) {
 				repo.EXPECT().UpdateQuestRank(bulkQuest[0]).Return(nil).Times(1)
 			},
 			wantErr: false,
+		},
+		{
+			name: "failed updated a quest rank",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func(repo *MockRepository) {
+				repo.EXPECT().UpdateQuestRank(bulkQuest[0]).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -199,6 +225,19 @@ func TestUpdateQuestReward(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "failed updated a quest reward",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func(repo *MockRepository) {
+				repo.EXPECT().UpdateQuestReward(bulkQuest[0]).Return(errors.New("any errors")).Times(1)
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -245,6 +284,19 @@ func TestDeleteQuest(t *testing.T) {
 				repo.EXPECT().DeleteQuest(bulkQuest[0]).Return(nil).Times(1)
 			},
 			wantErr: false,
+		},
+		{
+			name: "failed deleted a quest",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func(repo *MockRepository) {
+				repo.EXPECT().DeleteQuest(bulkQuest[0]).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -298,21 +350,6 @@ func TestGetQuestByStatus(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			name: "success get 1 available quest",
-			fields: fields{
-				r: NewMockRepository(mockCtrl),
-			},
-			args: args{
-				status: constant.AvailableQuest,
-			},
-			mock: func(repo *MockRepository) {
-				repo.EXPECT().GetAllAvailableQuest().Return(bulkQuestByStatus[:1], nil).Times(1)
-			},
-			outQuest: bulkQuestByStatus[:1],
-			outLen:   1,
-			wantErr:  false,
-		},
-		{
 			name: "success get 2 available quest",
 			fields: fields{
 				r: NewMockRepository(mockCtrl),
@@ -326,6 +363,21 @@ func TestGetQuestByStatus(t *testing.T) {
 			outQuest: bulkQuestByStatus[:2],
 			outLen:   2,
 			wantErr:  false,
+		},
+		{
+			name: "failed available quest",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+			},
+			args: args{
+				status: constant.AvailableQuest,
+			},
+			mock: func(repo *MockRepository) {
+				repo.EXPECT().GetAllAvailableQuest().Return([]model.GetQuestByStatus{}, errors.New("any error")).Times(1)
+			},
+			outQuest: []model.GetQuestByStatus{},
+			outLen:   0,
+			wantErr:  true,
 		},
 		{
 			name: "success get none completed quest",
@@ -356,6 +408,21 @@ func TestGetQuestByStatus(t *testing.T) {
 			outQuest: bulkQuestByStatus[2:],
 			outLen:   1,
 			wantErr:  false,
+		},
+		{
+			name: "failed completed quest",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+			},
+			args: args{
+				status: constant.CompletedQuest,
+			},
+			mock: func(repo *MockRepository) {
+				repo.EXPECT().GetAllCompletedQuest().Return([]model.GetQuestByStatus{}, errors.New("any error")).Times(1)
+			},
+			outQuest: []model.GetQuestByStatus{},
+			outLen:   0,
+			wantErr:  true,
 		},
 	}
 	for _, tt := range tests {
@@ -478,6 +545,43 @@ func TestTakeQuest(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "error add taken by to db",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id: 1,
+				adv_id:   1,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				repo.EXPECT().GetQuest(int64(1)).Return(bulkQuest[0], nil).Times(1)
+				advRepo.EXPECT().GetAdventurer(int64(1)).Return(adv, nil).Times(1)
+				repo.EXPECT().CreateTakenBy(int64(1), int64(1)).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "error update status quest db",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id: 1,
+				adv_id:   1,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				repo.EXPECT().GetQuest(int64(1)).Return(bulkQuest[0], nil).Times(1)
+				advRepo.EXPECT().GetAdventurer(int64(1)).Return(adv, nil).Times(1)
+				repo.EXPECT().CreateTakenBy(int64(1), int64(1)).Return(nil).Times(1)
+				copyQuest := bulkQuest[0]
+				copyQuest.Status = constant.WorkingQuest
+				repo.EXPECT().UpdateQuestStatus(copyQuest).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -534,6 +638,39 @@ func TestReportQuest(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "report completed quest failed update status",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     1,
+				adv_id:       1,
+				is_completed: true,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				advRepo.EXPECT().AddCompletedQuest(int64(1)).Return(nil).Times(1)
+				repo.EXPECT().UpdateQuestStatus(model.Quest{ID: 1, Status: 2}).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "report completed quest failed add completed test",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     1,
+				adv_id:       1,
+				is_completed: true,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				advRepo.EXPECT().AddCompletedQuest(int64(1)).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
+		},
+		{
 			name: "report uncompleted quest",
 			fields: fields{
 				r: NewMockRepository(mockCtrl),
@@ -548,6 +685,22 @@ func TestReportQuest(t *testing.T) {
 				repo.EXPECT().UpdateQuestStatus(model.Quest{ID: 1, Status: 0}).Return(nil).Times(1)
 			},
 			wantErr: false,
+		},
+		{
+			name: "report uncompleted quest failed",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     1,
+				adv_id:       1,
+				is_completed: false,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				repo.EXPECT().UpdateQuestStatus(model.Quest{ID: 1, Status: 0}).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
