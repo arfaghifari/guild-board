@@ -216,7 +216,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 		wantErr        bool
 	}{
 		{
-			name: "success created an adventurer",
+			name: "success updated an adventurer rank",
 			fields: fields{
 				u: usecase.NewMockUsecase(mockCtrl),
 			},
