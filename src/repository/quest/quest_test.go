@@ -71,11 +71,20 @@ var bulkQuestByStatus = []model.GetQuestByStatus{
 	},
 }
 
+func TestClose(t *testing.T) {
+	db, _ := NewMock()
+	r := repository{
+		db: db,
+	}
+	r.Close()
+}
+
 func TestNewRepository(t *testing.T) {
 	res, err := NewRepository()
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
 }
+
 func TestGetAllCompletedQuest(t *testing.T) {
 	db, mock := NewMock()
 	defer func() {
@@ -122,6 +131,33 @@ func TestGetAllCompletedQuest(t *testing.T) {
 			outQuest: []model.GetQuestByStatus{},
 			outLen:   0,
 			wantErr:  false,
+		},
+		{
+			name: "failed query",
+			fields: fields{
+				db: db,
+			},
+			mock: func() {
+				mock.ExpectQuery(query).WithArgs(constant.CompletedQuest).WillReturnError(sql.ErrConnDone)
+			},
+			outQuest: []model.GetQuestByStatus{},
+			outLen:   0,
+			wantErr:  true,
+		},
+		{
+			name: "failed scan query",
+			fields: fields{
+				db: db,
+			},
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"quest_id", "name", "description", "minimum_rank", "reward_number"}).
+					AddRow(bulkQuest[2].ID, nil, bulkQuest[2].Description, bulkQuest[2].MinimumRank, bulkQuest[2].RewardNumber)
+				mock.ExpectQuery(query).WithArgs(constant.CompletedQuest).WillReturnRows(rows)
+
+			},
+			outQuest: []model.GetQuestByStatus{},
+			outLen:   0,
+			wantErr:  true,
 		},
 	}
 	for _, tt := range tests {
@@ -207,6 +243,33 @@ func TestGetAllAvailabeTest(t *testing.T) {
 			outLen:   0,
 			wantErr:  false,
 		},
+		{
+			name: "failed query",
+			fields: fields{
+				db: db,
+			},
+			mock: func() {
+				mock.ExpectQuery(query).WithArgs(constant.AvailableQuest).WillReturnError(sql.ErrConnDone)
+			},
+			outQuest: []model.GetQuestByStatus{},
+			outLen:   0,
+			wantErr:  true,
+		},
+		{
+			name: "failed scan query",
+			fields: fields{
+				db: db,
+			},
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"quest_id", "name", "description", "minimum_rank", "reward_number"}).
+					AddRow(bulkQuest[0].ID, nil, bulkQuest[0].Description, bulkQuest[0].MinimumRank, bulkQuest[0].RewardNumber)
+				mock.ExpectQuery(query).WithArgs(constant.AvailableQuest).WillReturnRows(rows)
+
+			},
+			outQuest: []model.GetQuestByStatus{},
+			outLen:   0,
+			wantErr:  true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -226,26 +289,6 @@ func TestGetAllAvailabeTest(t *testing.T) {
 		})
 	}
 }
-
-// func TestGetAllAvailabeTest(t *testing.T) {
-// 	db, mock := NewMock()
-// 	repo := &repository{db}
-// 	defer func() {
-// 		repo.Close()
-// 	}()
-// 	availableStastus := constant.AvailableQuest
-// 	query := regexp.QuoteMeta("SELECT quest_id, name, description, minimum_rank, reward_number FROM quest WHERE status = $1")
-// 	rows := sqlmock.NewRows([]string{"quest_id", "name", "description", "minimum_rank", "reward_number"}).
-// 		AddRow(bulkQuest[0].ID, bulkQuest[0].Name, bulkQuest[0].Description, bulkQuest[0].MinimumRank, bulkQuest[0].RewardNumber).
-// 		AddRow(bulkQuest[1].ID, bulkQuest[1].Name, bulkQuest[1].Description, bulkQuest[1].MinimumRank, bulkQuest[1].RewardNumber)
-
-// 	mock.ExpectQuery(query).WithArgs(availableStastus).WillReturnRows(rows)
-
-// 	quest, err := repo.GetAllAvailableQuest()
-// 	assert.NotEmpty(t, quest)
-// 	assert.NoError(t, err)
-// 	assert.Len(t, quest, 2)
-// }
 
 func TestCreateQuest(t *testing.T) {
 	db, mock := NewMock()
@@ -279,6 +322,20 @@ func TestCreateQuest(t *testing.T) {
 				prep.ExpectExec().WithArgs(bulkQuest[0].Name, bulkQuest[0].Description, bulkQuest[0].MinimumRank, bulkQuest[0].RewardNumber).WillReturnResult(sqlmock.NewResult(0, 1))
 			},
 			wantErr: false,
+		},
+		{
+			name: "failed created a quest",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.WillReturnError(sql.ErrConnDone)
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -330,6 +387,20 @@ func TestUpdateQuestRank(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "failed updated quest rank",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.WillReturnError(sql.ErrConnDone)
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -379,6 +450,20 @@ func TestUpdateQuestReward(t *testing.T) {
 				prep.ExpectExec().WithArgs(bulkQuest[0].RewardNumber, bulkQuest[0].ID).WillReturnResult(sqlmock.NewResult(0, 1))
 			},
 			wantErr: false,
+		},
+		{
+			name: "failed updated quest reward",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.WillReturnError(sql.ErrConnDone)
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -430,6 +515,20 @@ func TestUpdateQuestStatus(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "failed updated quest status",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.WillReturnError(sql.ErrConnDone)
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -479,6 +578,20 @@ func TestDeleteQuest(t *testing.T) {
 				prep.ExpectExec().WithArgs(bulkQuest[0].ID).WillReturnResult(sqlmock.NewResult(0, 1))
 			},
 			wantErr: false,
+		},
+		{
+			name: "failed deleted quest",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				quest: bulkQuest[0],
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.WillReturnError(sql.ErrConnDone)
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -566,6 +679,7 @@ func TestGetQuest(t *testing.T) {
 		})
 	}
 }
+
 func TestCreateTakenBy(t *testing.T) {
 	db, mock := NewMock()
 	defer func() {
@@ -600,6 +714,21 @@ func TestCreateTakenBy(t *testing.T) {
 				prep.ExpectExec().WithArgs(1, 1).WillReturnResult(sqlmock.NewResult(0, 1))
 			},
 			wantErr: false,
+		},
+		{
+			name: "success took a quest",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				quest_id: 1,
+				adv_id:   1,
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.WillReturnError(sql.ErrConnDone)
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

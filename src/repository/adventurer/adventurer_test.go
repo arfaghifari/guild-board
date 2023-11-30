@@ -33,6 +33,14 @@ func TestNewRepository(t *testing.T) {
 	assert.NotNil(t, res)
 }
 
+func TestClose(t *testing.T) {
+	db, _ := NewMock()
+	r := repository{
+		db: db,
+	}
+	r.Close()
+}
+
 func TestCreateAdventurer(t *testing.T) {
 	db, mock := NewMock()
 	defer func() {
@@ -65,6 +73,20 @@ func TestCreateAdventurer(t *testing.T) {
 				prep.ExpectExec().WithArgs(adv.Name, adv.Rank).WillReturnResult(sqlmock.NewResult(0, 1))
 			},
 			wantErr: false,
+		},
+		{
+			name: "failed created an adventurer",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				adv: adv,
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.WillReturnError(sql.ErrConnDone)
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -116,6 +138,20 @@ func TestUpdateAdventureRank(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "failed updated rank an adventurer",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				adv: adv,
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.WillReturnError(sql.ErrConnDone)
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -165,6 +201,20 @@ func TestAddCompletedQuest(t *testing.T) {
 				prep.ExpectExec().WithArgs(adv.ID).WillReturnResult(sqlmock.NewResult(0, 1))
 			},
 			wantErr: false,
+		},
+		{
+			name: "failed added completed quest an adventurer",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				ID: adv.ID,
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.WillReturnError(sql.ErrConnDone)
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
