@@ -29,69 +29,222 @@ var adv = model.Adventurer{
 
 func TestCreateAdventurer(t *testing.T) {
 	db, mock := NewMock()
-	repo := &repository{db}
 	defer func() {
-		repo.Close()
+		db.Close()
 	}()
-
 	query := regexp.QuoteMeta("INSERT INTO adventurer(name, rank) VALUES($1, $2)")
-
-	prep := mock.ExpectPrepare(query)
-	prep.ExpectExec().WithArgs(adv.Name, adv.Rank).WillReturnResult(sqlmock.NewResult(0, 1))
-
-	err := repo.CreateAdventurer(adv)
-	assert.NoError(t, err)
-
+	type fields struct {
+		db *sql.DB
+	}
+	type args struct {
+		adv model.Adventurer
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func()
+		wantErr bool
+	}{
+		{
+			name: "success created an adventurer",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				adv: adv,
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.ExpectExec().WithArgs(adv.Name, adv.Rank).WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &repository{
+				db: tt.fields.db,
+			}
+			tt.mock()
+			err := r.CreateAdventurer(tt.args.adv)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
 }
 
 func TestUpdateAdventureRank(t *testing.T) {
 	db, mock := NewMock()
-	repo := &repository{db}
 	defer func() {
-		repo.Close()
+		db.Close()
 	}()
-
 	query := regexp.QuoteMeta("UPDATE adventurer SET rank = $1 WHERE id = $2")
-
-	prep := mock.ExpectPrepare(query)
-	prep.ExpectExec().WithArgs(adv.Rank, adv.ID).WillReturnResult(sqlmock.NewResult(0, 1))
-
-	err := repo.UpdateAdventurerRank(adv)
-	assert.NoError(t, err)
+	type fields struct {
+		db *sql.DB
+	}
+	type args struct {
+		adv model.Adventurer
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func()
+		wantErr bool
+	}{
+		{
+			name: "success updated rank an adventurer",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				adv: adv,
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.ExpectExec().WithArgs(adv.Rank, adv.ID).WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &repository{
+				db: tt.fields.db,
+			}
+			tt.mock()
+			err := r.UpdateAdventurerRank(tt.args.adv)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
 }
 
 func TestAddCompletedQuest(t *testing.T) {
 	db, mock := NewMock()
-	repo := &repository{db}
 	defer func() {
-		repo.Close()
+		db.Close()
 	}()
-
 	query := regexp.QuoteMeta("UPDATE adventurer SET completed_quest = completed_quest + 1 WHERE id = $1")
-
-	prep := mock.ExpectPrepare(query)
-	prep.ExpectExec().WithArgs(adv.ID).WillReturnResult(sqlmock.NewResult(0, 1))
-
-	err := repo.AddCompletedQuest(adv.ID)
-	assert.NoError(t, err)
+	type fields struct {
+		db *sql.DB
+	}
+	type args struct {
+		ID int64
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func()
+		wantErr bool
+	}{
+		{
+			name: "success added completed quest an adventurer",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				ID: adv.ID,
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.ExpectExec().WithArgs(adv.ID).WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &repository{
+				db: tt.fields.db,
+			}
+			tt.mock()
+			err := r.AddCompletedQuest(tt.args.ID)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
 }
 
 func TestGetAdventurer(t *testing.T) {
 	db, mock := NewMock()
-	repo := &repository{db}
 	defer func() {
-		repo.Close()
+		db.Close()
 	}()
+	query := regexp.QuoteMeta("SELECT name, rank, completed_quest FROM adventurer WHERE id = $1")
+	type fields struct {
+		db *sql.DB
+	}
+	type args struct {
+		ID int64
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func()
+		outAdv  model.Adventurer
+		wantErr bool
+	}{
+		{
+			name: "success get an adventurer",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				ID: adv.ID,
+			},
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"name", "rank", "completed_quest"}).
+					AddRow(adv.Name, adv.Rank, adv.CompletedQuest)
 
-	query := "SELECT name, rank, completed_quest FROM adventurer WHERE id = \\$1"
+				mock.ExpectQuery(query).WithArgs(adv.ID).WillReturnRows(rows)
+			},
+			outAdv:  adv,
+			wantErr: false,
+		},
+		{
+			name: "failed get an adventurer",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				ID: adv.ID,
+			},
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"name", "rank", "completed_quest"})
 
-	rows := sqlmock.NewRows([]string{"name", "rank", "completed_quest"}).
-		AddRow(adv.Name, adv.Rank, adv.CompletedQuest)
-
-	mock.ExpectQuery(query).WithArgs(adv.ID).WillReturnRows(rows)
-
-	user, err := repo.GetAdventurer(adv.ID)
-	assert.NotNil(t, user)
-	assert.Equal(t, adv, user)
-	assert.NoError(t, err)
+				mock.ExpectQuery(query).WithArgs(adv.ID).WillReturnRows(rows)
+			},
+			outAdv:  model.Adventurer{ID: adv.ID},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &repository{
+				db: tt.fields.db,
+			}
+			tt.mock()
+			res, err := r.GetAdventurer(tt.args.ID)
+			assert.NotNil(t, res)
+			assert.Equal(t, tt.outAdv, res)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
 }
