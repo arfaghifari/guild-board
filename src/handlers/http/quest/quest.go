@@ -317,12 +317,12 @@ func (h *handlers) ReportQuest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if reportQuest.AdventurerID <= 0 || reportQuest.QuestID <= 0 {
-		resp.Header.Error = "adv_id and quest_id are required and must be valid"
+	if reportQuest.AdventurerID <= 0 || reportQuest.QuestID <= 0 || reportQuest.IsCompleted == nil {
+		resp.Header.Error = "adv_id, quest_id and is_completed are required and must be valid"
 		return
 	}
 
-	err := h.usecase.ReportQuest(reportQuest.QuestID, reportQuest.AdventurerID, reportQuest.IsCompleted)
+	err := h.usecase.ReportQuest(reportQuest.QuestID, reportQuest.AdventurerID, *reportQuest.IsCompleted)
 
 	if err != nil {
 		statusCode = 500

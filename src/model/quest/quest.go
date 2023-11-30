@@ -25,5 +25,5 @@ type TakenBy struct {
 type ReportQuest struct {
 	QuestID      int64 `json:"quest_id"`
 	AdventurerID int64 `json:"adv_id"`
-	IsCompleted  bool  `json:"is_completed"`
+	IsCompleted  *bool `json:"is_completed"`
 }
