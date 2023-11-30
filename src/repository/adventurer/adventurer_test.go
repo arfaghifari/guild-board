@@ -27,6 +27,12 @@ var adv = model.Adventurer{
 	CompletedQuest: 1,
 }
 
+func TestNewRepository(t *testing.T) {
+	res, err := NewRepository()
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+}
+
 func TestCreateAdventurer(t *testing.T) {
 	db, mock := NewMock()
 	defer func() {

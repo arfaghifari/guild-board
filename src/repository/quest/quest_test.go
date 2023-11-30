@@ -71,6 +71,11 @@ var bulkQuestByStatus = []model.GetQuestByStatus{
 	},
 }
 
+func TestNewRepository(t *testing.T) {
+	res, err := NewRepository()
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+}
 func TestGetAllCompletedQuest(t *testing.T) {
 	db, mock := NewMock()
 	defer func() {

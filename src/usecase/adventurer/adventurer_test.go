@@ -1,10 +1,10 @@
 package adventurer
 
 import (
+	"errors"
 	"testing"
 
 	model "github.com/arfaghifari/guild-board/src/model/adventurer"
-	repo "github.com/arfaghifari/guild-board/src/repository/adventurer"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -16,12 +16,18 @@ var adv = model.Adventurer{
 	CompletedQuest: 1,
 }
 
+func TestNewUsecase(t *testing.T) {
+	res, err := NewUsecase()
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+}
+
 func TestCreateAdventurer(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
 	type fields struct {
-		r *repo.MockRepository
+		r *MockRepository
 	}
 	type args struct {
 		adv model.Adventurer
@@ -30,21 +36,34 @@ func TestCreateAdventurer(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		mock    func(*repo.MockRepository)
+		mock    func(*MockRepository)
 		wantErr bool
 	}{
 		{
 			name: "success created an adventurer",
 			fields: fields{
-				r: repo.NewMockRepository(mockCtrl),
+				r: NewMockRepository(mockCtrl),
 			},
 			args: args{
 				adv: adv,
 			},
-			mock: func(repo *repo.MockRepository) {
+			mock: func(repo *MockRepository) {
 				repo.EXPECT().CreateAdventurer(adv).Return(nil).Times(1)
 			},
 			wantErr: false,
+		},
+		{
+			name: "failed",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+			},
+			args: args{
+				adv: adv,
+			},
+			mock: func(repo *MockRepository) {
+				repo.EXPECT().CreateAdventurer(adv).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -68,7 +87,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	type fields struct {
-		r *repo.MockRepository
+		r *MockRepository
 	}
 	type args struct {
 		adv model.Adventurer
@@ -77,21 +96,34 @@ func TestUpdateAdventureRank(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		mock    func(*repo.MockRepository)
+		mock    func(*MockRepository)
 		wantErr bool
 	}{
 		{
 			name: "success updated rank an adventurer",
 			fields: fields{
-				r: repo.NewMockRepository(mockCtrl),
+				r: NewMockRepository(mockCtrl),
 			},
 			args: args{
 				adv: adv,
 			},
-			mock: func(repo *repo.MockRepository) {
+			mock: func(repo *MockRepository) {
 				repo.EXPECT().UpdateAdventurerRank(adv).Return(nil).Times(1)
 			},
 			wantErr: false,
+		},
+		{
+			name: "failed",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+			},
+			args: args{
+				adv: adv,
+			},
+			mock: func(repo *MockRepository) {
+				repo.EXPECT().UpdateAdventurerRank(adv).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

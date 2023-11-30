@@ -13,7 +13,6 @@ import (
 	constant "github.com/arfaghifari/guild-board/src/constant"
 	modelAdv "github.com/arfaghifari/guild-board/src/model/adventurer"
 	model "github.com/arfaghifari/guild-board/src/model/quest"
-	usecase "github.com/arfaghifari/guild-board/src/usecase/quest"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
@@ -77,6 +76,12 @@ var bulkQuestByStatus = []model.GetQuestByStatus{
 	},
 }
 
+func TestNewHandlers(t *testing.T) {
+	res, err := NewHandlers()
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+}
+
 func TestGetHello(t *testing.T) {
 
 	ctx := context.Background()
@@ -95,7 +100,7 @@ func TestGetHello(t *testing.T) {
 func TestGetQuestByStatus(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockUsecase := usecase.NewMockUsecase(mockCtrl)
+	mockUsecase := NewMockUsecase(mockCtrl)
 	testHandlers := &handlers{usecase: mockUsecase}
 	mockUsecase.EXPECT().GetQuestByStatus(int32(constant.AvailableQuest)).Return(bulkQuestByStatus[0:1], nil).Times(1)
 	ctx := context.Background()
@@ -118,7 +123,7 @@ func TestGetQuestByStatus(t *testing.T) {
 func TestGetQuestByStatusC(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockUsecase := usecase.NewMockUsecase(mockCtrl)
+	mockUsecase := NewMockUsecase(mockCtrl)
 	testHandlers := &handlers{usecase: mockUsecase}
 	mockUsecase.EXPECT().GetQuestByStatus(int32(constant.CompletedQuest)).Return(bulkQuestByStatus[2:], nil).Times(1)
 	ctx := context.Background()
@@ -142,7 +147,7 @@ func TestCreateQuest(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	type fields struct {
-		u *usecase.MockUsecase
+		u *MockUsecase
 	}
 	type requests struct {
 		body string
@@ -155,14 +160,14 @@ func TestCreateQuest(t *testing.T) {
 		fields         fields
 		req            requests
 		resp           responses
-		mock           func(*usecase.MockUsecase)
+		mock           func(*MockUsecase)
 		wantStatusCode int
 		wantErr        bool
 	}{
 		{
 			name: "success created a quest",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11, "reward_number" : 200000}`,
@@ -170,7 +175,7 @@ func TestCreateQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: true},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				quest := bulkQuest[0]
 				quest.ID = 0
 				usecase.EXPECT().CreateQuest(quest).Return(nil).Times(1)
@@ -181,7 +186,7 @@ func TestCreateQuest(t *testing.T) {
 		{
 			name: "json failed",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{`,
@@ -189,7 +194,7 @@ func TestCreateQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -198,7 +203,7 @@ func TestCreateQuest(t *testing.T) {
 		{
 			name: "empty name",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11, "reward_number" : 200000}`,
@@ -206,7 +211,7 @@ func TestCreateQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -215,7 +220,7 @@ func TestCreateQuest(t *testing.T) {
 		{
 			name: "invalid name",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"name" : "",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11, "reward_number" : 200000}`,
@@ -223,7 +228,7 @@ func TestCreateQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -232,7 +237,7 @@ func TestCreateQuest(t *testing.T) {
 		{
 			name: "empty rank",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" ,  "reward_number" : 200000}`,
@@ -240,7 +245,7 @@ func TestCreateQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -249,7 +254,7 @@ func TestCreateQuest(t *testing.T) {
 		{
 			name: "invalid rank",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : -1, "reward_number" : 200000}`,
@@ -257,7 +262,7 @@ func TestCreateQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -266,7 +271,7 @@ func TestCreateQuest(t *testing.T) {
 		{
 			name: "empty reward",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11}`,
@@ -274,7 +279,7 @@ func TestCreateQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -283,7 +288,7 @@ func TestCreateQuest(t *testing.T) {
 		{
 			name: "invalid reward",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11, "reward_number" : -1}`,
@@ -291,7 +296,7 @@ func TestCreateQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -300,7 +305,7 @@ func TestCreateQuest(t *testing.T) {
 		{
 			name: "error at layer usecase",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11, "reward_number" : 200000}`,
@@ -308,7 +313,7 @@ func TestCreateQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				quest := bulkQuest[0]
 				quest.ID = 0
 				usecase.EXPECT().CreateQuest(quest).Return(errors.New("any error")).Times(1)
@@ -348,7 +353,7 @@ func TestUpdateQuestRank(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	type fields struct {
-		u *usecase.MockUsecase
+		u *MockUsecase
 	}
 	type requests struct {
 		body string
@@ -365,14 +370,14 @@ func TestUpdateQuestRank(t *testing.T) {
 		fields         fields
 		req            requests
 		resp           responses
-		mock           func(*usecase.MockUsecase)
+		mock           func(*MockUsecase)
 		wantStatusCode int
 		wantErr        bool
 	}{
 		{
 			name: "success update rank quest",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id" : 1, "minimum_rank" : 12 }`,
@@ -380,7 +385,7 @@ func TestUpdateQuestRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: true},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				usecase.EXPECT().UpdateQuestRank(quest).Return(nil).Times(1)
 			},
 			wantStatusCode: http.StatusOK,
@@ -389,7 +394,7 @@ func TestUpdateQuestRank(t *testing.T) {
 		{
 			name: "json failed",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{`,
@@ -397,7 +402,7 @@ func TestUpdateQuestRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -406,7 +411,7 @@ func TestUpdateQuestRank(t *testing.T) {
 		{
 			name: "empty id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{ "minimum_rank" : 11 }`,
@@ -414,7 +419,7 @@ func TestUpdateQuestRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -423,7 +428,7 @@ func TestUpdateQuestRank(t *testing.T) {
 		{
 			name: "invalid id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id" : -1, "minimum_rank": 11 }`,
@@ -431,7 +436,7 @@ func TestUpdateQuestRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -440,7 +445,7 @@ func TestUpdateQuestRank(t *testing.T) {
 		{
 			name: "empty rank",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id" : 1 }`,
@@ -448,7 +453,7 @@ func TestUpdateQuestRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -457,7 +462,7 @@ func TestUpdateQuestRank(t *testing.T) {
 		{
 			name: "invalid rank",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id" : 1, "minimum_rank": -2 }`,
@@ -465,7 +470,7 @@ func TestUpdateQuestRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -474,7 +479,7 @@ func TestUpdateQuestRank(t *testing.T) {
 		{
 			name: "error at layer usecase",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id" : 1, "minimum_rank" : 12 }`,
@@ -482,7 +487,7 @@ func TestUpdateQuestRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				usecase.EXPECT().UpdateQuestRank(quest).Return(errors.New("any error")).Times(1)
 			},
 			wantStatusCode: http.StatusInternalServerError,
@@ -520,7 +525,7 @@ func TestUpdateQuestReward(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	type fields struct {
-		u *usecase.MockUsecase
+		u *MockUsecase
 	}
 	type requests struct {
 		body string
@@ -537,14 +542,14 @@ func TestUpdateQuestReward(t *testing.T) {
 		fields         fields
 		req            requests
 		resp           responses
-		mock           func(*usecase.MockUsecase)
+		mock           func(*MockUsecase)
 		wantStatusCode int
 		wantErr        bool
 	}{
 		{
 			name: "success update rank quest",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id" : 1, "reward_number" : 250000 }`,
@@ -552,7 +557,7 @@ func TestUpdateQuestReward(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: true},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				usecase.EXPECT().UpdateQuestReward(quest).Return(nil).Times(1)
 			},
 			wantStatusCode: http.StatusOK,
@@ -561,7 +566,7 @@ func TestUpdateQuestReward(t *testing.T) {
 		{
 			name: "json failed",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{`,
@@ -569,7 +574,7 @@ func TestUpdateQuestReward(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -578,7 +583,7 @@ func TestUpdateQuestReward(t *testing.T) {
 		{
 			name: "empty id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{ "reward_number" : 250000 }`,
@@ -586,7 +591,7 @@ func TestUpdateQuestReward(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -595,7 +600,7 @@ func TestUpdateQuestReward(t *testing.T) {
 		{
 			name: "invalid id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id" : -1, "reward_number" : 250000 }`,
@@ -603,7 +608,7 @@ func TestUpdateQuestReward(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -612,7 +617,7 @@ func TestUpdateQuestReward(t *testing.T) {
 		{
 			name: "empty reward",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id" : 1 }`,
@@ -620,7 +625,7 @@ func TestUpdateQuestReward(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -629,7 +634,7 @@ func TestUpdateQuestReward(t *testing.T) {
 		{
 			name: "invalid reward",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id" : 1, "reward_number" : -1 }`,
@@ -637,7 +642,7 @@ func TestUpdateQuestReward(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -646,7 +651,7 @@ func TestUpdateQuestReward(t *testing.T) {
 		{
 			name: "error at layer usecase",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id" : 1, "reward_number" : 250000 }`,
@@ -654,7 +659,7 @@ func TestUpdateQuestReward(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				usecase.EXPECT().UpdateQuestReward(quest).Return(errors.New("any error")).Times(1)
 			},
 			wantStatusCode: http.StatusInternalServerError,
@@ -692,7 +697,7 @@ func TestTakeQuest(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	type fields struct {
-		u *usecase.MockUsecase
+		u *MockUsecase
 	}
 	type requests struct {
 		body string
@@ -705,14 +710,14 @@ func TestTakeQuest(t *testing.T) {
 		fields         fields
 		req            requests
 		resp           responses
-		mock           func(*usecase.MockUsecase)
+		mock           func(*MockUsecase)
 		wantStatusCode int
 		wantErr        bool
 	}{
 		{
 			name: "success took a quest",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": 1, "adv_id" : 1}`,
@@ -720,7 +725,7 @@ func TestTakeQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: true},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				quest := bulkQuest[0]
 				quest.ID = 0
 				usecase.EXPECT().TakeQuest(bulkQuest[0].ID, adv.ID).Return(nil).Times(1)
@@ -731,7 +736,7 @@ func TestTakeQuest(t *testing.T) {
 		{
 			name: "json failed",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{`,
@@ -739,7 +744,7 @@ func TestTakeQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -748,7 +753,7 @@ func TestTakeQuest(t *testing.T) {
 		{
 			name: "empty quest_id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{ "adv_id" : 1}`,
@@ -756,7 +761,7 @@ func TestTakeQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -765,7 +770,7 @@ func TestTakeQuest(t *testing.T) {
 		{
 			name: "invalid quest_id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": -1, "adv_id" : 1}`,
@@ -773,7 +778,7 @@ func TestTakeQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -782,7 +787,7 @@ func TestTakeQuest(t *testing.T) {
 		{
 			name: "empty adv_id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": 1}`,
@@ -790,7 +795,7 @@ func TestTakeQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -799,7 +804,7 @@ func TestTakeQuest(t *testing.T) {
 		{
 			name: "invalid adv_id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": 1, "adv_id" : -1}`,
@@ -807,7 +812,7 @@ func TestTakeQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -816,7 +821,7 @@ func TestTakeQuest(t *testing.T) {
 		{
 			name: "error at layer usecase",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": 1, "adv_id" : 1}`,
@@ -824,7 +829,7 @@ func TestTakeQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				quest := bulkQuest[0]
 				quest.ID = 0
 				usecase.EXPECT().TakeQuest(bulkQuest[0].ID, adv.ID).Return(errors.New("any error")).Times(1)
@@ -864,7 +869,7 @@ func TestReportQuest(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	type fields struct {
-		u *usecase.MockUsecase
+		u *MockUsecase
 	}
 	type requests struct {
 		body string
@@ -877,14 +882,14 @@ func TestReportQuest(t *testing.T) {
 		fields         fields
 		req            requests
 		resp           responses
-		mock           func(*usecase.MockUsecase)
+		mock           func(*MockUsecase)
 		wantStatusCode int
 		wantErr        bool
 	}{
 		{
 			name: "success report a quest",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": 1, "adv_id" : 1, "is_completed" : true}`,
@@ -892,7 +897,7 @@ func TestReportQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: true},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				quest := bulkQuest[0]
 				quest.ID = 0
 				usecase.EXPECT().ReportQuest(bulkQuest[0].ID, adv.ID, true).Return(nil).Times(1)
@@ -903,7 +908,7 @@ func TestReportQuest(t *testing.T) {
 		{
 			name: "success  uncompleted a quest",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": 1, "adv_id" : 1, "is_completed" : false}`,
@@ -911,7 +916,7 @@ func TestReportQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: true},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				quest := bulkQuest[0]
 				quest.ID = 0
 				usecase.EXPECT().ReportQuest(bulkQuest[0].ID, adv.ID, false).Return(nil).Times(1)
@@ -922,7 +927,7 @@ func TestReportQuest(t *testing.T) {
 		{
 			name: "json failed",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{`,
@@ -930,7 +935,7 @@ func TestReportQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -939,7 +944,7 @@ func TestReportQuest(t *testing.T) {
 		{
 			name: "empty quest_id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{ "adv_id" : 1,  "is_completed" : true}`,
@@ -947,7 +952,7 @@ func TestReportQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -956,7 +961,7 @@ func TestReportQuest(t *testing.T) {
 		{
 			name: "invalid quest_id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": -1, "adv_id" : 1,  "is_completed" : true}`,
@@ -964,7 +969,7 @@ func TestReportQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -973,7 +978,7 @@ func TestReportQuest(t *testing.T) {
 		{
 			name: "empty adv_id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": 1,  "is_completed" : true}`,
@@ -981,7 +986,7 @@ func TestReportQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -990,7 +995,7 @@ func TestReportQuest(t *testing.T) {
 		{
 			name: "invalid adv_id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": 1, "adv_id" : -1,  "is_completed" : true}`,
@@ -998,7 +1003,7 @@ func TestReportQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -1007,7 +1012,7 @@ func TestReportQuest(t *testing.T) {
 		{
 			name: "empty is_completed",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": 1, "adv_id" : 1}`,
@@ -1015,7 +1020,7 @@ func TestReportQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -1024,7 +1029,7 @@ func TestReportQuest(t *testing.T) {
 		{
 			name: "error at layer usecase",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"quest_id": 1, "adv_id" : 1, "is_completed" : true}`,
@@ -1032,7 +1037,7 @@ func TestReportQuest(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				quest := bulkQuest[0]
 				quest.ID = 0
 				usecase.EXPECT().ReportQuest(bulkQuest[0].ID, adv.ID, true).Return(errors.New("any error")).Times(1)

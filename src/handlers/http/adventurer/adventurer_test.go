@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	model "github.com/arfaghifari/guild-board/src/model/adventurer"
-	usecase "github.com/arfaghifari/guild-board/src/usecase/adventurer"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
@@ -25,12 +24,18 @@ var adv2 = model.Adventurer{
 	Rank: 12,
 }
 
+func TestNewHandlers(t *testing.T) {
+	res, err := NewHandlers()
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+}
+
 func TestCreateAdventurer(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
 	type fields struct {
-		u *usecase.MockUsecase
+		u *MockUsecase
 	}
 	type requests struct {
 		body string
@@ -43,14 +48,14 @@ func TestCreateAdventurer(t *testing.T) {
 		fields         fields
 		req            requests
 		resp           responses
-		mock           func(*usecase.MockUsecase)
+		mock           func(*MockUsecase)
 		wantStatusCode int
 		wantErr        bool
 	}{
 		{
 			name: "success created an adventurer",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"name" : "andi", "rank" : 11 }`,
@@ -58,7 +63,7 @@ func TestCreateAdventurer(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: true},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				usecase.EXPECT().CreateAdventurer(adv).Return(nil).Times(1)
 			},
 			wantStatusCode: http.StatusOK,
@@ -67,7 +72,7 @@ func TestCreateAdventurer(t *testing.T) {
 		{
 			name: "json failed",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{`,
@@ -75,7 +80,7 @@ func TestCreateAdventurer(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -84,7 +89,7 @@ func TestCreateAdventurer(t *testing.T) {
 		{
 			name: "empty name",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{ "rank" : 11 }`,
@@ -92,7 +97,7 @@ func TestCreateAdventurer(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -101,7 +106,7 @@ func TestCreateAdventurer(t *testing.T) {
 		{
 			name: "invalid name",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"name" : "" , "rank" : 11}`,
@@ -109,7 +114,7 @@ func TestCreateAdventurer(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -118,7 +123,7 @@ func TestCreateAdventurer(t *testing.T) {
 		{
 			name: "empty rank",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"name" : "andi" }`,
@@ -126,7 +131,7 @@ func TestCreateAdventurer(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -135,7 +140,7 @@ func TestCreateAdventurer(t *testing.T) {
 		{
 			name: "invalid rank",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"rank" : -2, "name" : "andi" }`,
@@ -143,7 +148,7 @@ func TestCreateAdventurer(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -152,7 +157,7 @@ func TestCreateAdventurer(t *testing.T) {
 		{
 			name: "error at layer usecase",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"name" : "andi", "rank" : 11 }`,
@@ -160,7 +165,7 @@ func TestCreateAdventurer(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				usecase.EXPECT().CreateAdventurer(adv).Return(errors.New("any error")).Times(1)
 			},
 			wantStatusCode: http.StatusInternalServerError,
@@ -198,7 +203,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	type fields struct {
-		u *usecase.MockUsecase
+		u *MockUsecase
 	}
 	type requests struct {
 		body string
@@ -211,14 +216,14 @@ func TestUpdateAdventureRank(t *testing.T) {
 		fields         fields
 		req            requests
 		resp           responses
-		mock           func(*usecase.MockUsecase)
+		mock           func(*MockUsecase)
 		wantStatusCode int
 		wantErr        bool
 	}{
 		{
 			name: "success updated an adventurer rank",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"id" : 1, "rank" : 12 }`,
@@ -226,7 +231,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: true},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				usecase.EXPECT().UpdateAdventurerRank(adv2).Return(nil).Times(1)
 			},
 			wantStatusCode: http.StatusOK,
@@ -235,7 +240,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 		{
 			name: "json failed",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{`,
@@ -243,7 +248,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -252,7 +257,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 		{
 			name: "empty id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{ "rank" : 11 }`,
@@ -260,7 +265,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -269,7 +274,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 		{
 			name: "invalid id",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"id" : -1, "rank": 11 }`,
@@ -277,7 +282,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -286,7 +291,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 		{
 			name: "empty rank",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"id" : 1 }`,
@@ -294,7 +299,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -303,7 +308,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 		{
 			name: "invalid rank",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"id" : 1, "rank": -2 }`,
@@ -311,7 +316,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 
 			},
 			wantStatusCode: http.StatusBadRequest,
@@ -320,7 +325,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 		{
 			name: "error at layer usecase",
 			fields: fields{
-				u: usecase.NewMockUsecase(mockCtrl),
+				u: NewMockUsecase(mockCtrl),
 			},
 			req: requests{
 				body: `{"id" : 1, "rank" : 12 }`,
@@ -328,7 +333,7 @@ func TestUpdateAdventureRank(t *testing.T) {
 			resp: responses{
 				body: SuccesMessage{Success: false},
 			},
-			mock: func(usecase *usecase.MockUsecase) {
+			mock: func(usecase *MockUsecase) {
 				usecase.EXPECT().UpdateAdventurerRank(adv2).Return(errors.New("any error")).Times(1)
 			},
 			wantStatusCode: http.StatusInternalServerError,
