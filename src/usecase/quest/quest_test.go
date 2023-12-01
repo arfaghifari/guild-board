@@ -49,7 +49,7 @@ var bulkQuest = []model.Quest{
 		Description:  "membersihkan selokan penuh dengan lumut",
 		MinimumRank:  12,
 		RewardNumber: 200000,
-		Status:       constant.AvailableQuest,
+		Status:       constant.WorkingQuest,
 	},
 }
 
@@ -639,83 +639,141 @@ func TestReportQuest(t *testing.T) {
 				a: NewAdvMockRepository(mockCtrl),
 			},
 			args: args{
-				quest_id:     3,
-				adv_id:       1,
+				quest_id:     bulkQuest[3].ID,
+				adv_id:       adv.ID,
 				is_completed: true,
 			},
 			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
-				repo.EXPECT().IsExistTakenBy(3, 1).Return(nil).Times(1)
-				repo.EXPECT().GetQuest(3).Return(bulkQuest[3], nil).Times(1)
-				repo.EXPECT().UpdateQuestStatus(model.Quest{ID: 3, Status: 2}).Return(nil).Times(1)
+				repo.EXPECT().IsExistTakenBy(bulkQuest[3].ID, adv.ID).Return(nil).Times(1)
+				repo.EXPECT().GetQuest(bulkQuest[3].ID).Return(bulkQuest[3], nil).Times(1)
+				repo.EXPECT().UpdateQuestStatus(model.Quest{ID: bulkQuest[3].ID, Status: constant.CompletedQuest}).Return(nil).Times(1)
 				advRepo.EXPECT().AddCompletedQuest(int64(1)).Return(nil).Times(1)
 			},
 			wantErr: false,
 		},
-		// {
-		// 	name: "report completed quest failed update status",
-		// 	fields: fields{
-		// 		r: NewMockRepository(mockCtrl),
-		// 		a: NewAdvMockRepository(mockCtrl),
-		// 	},
-		// 	args: args{
-		// 		quest_id:     1,
-		// 		adv_id:       1,
-		// 		is_completed: true,
-		// 	},
-		// 	mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
-		// 		advRepo.EXPECT().AddCompletedQuest(int64(1)).Return(nil).Times(1)
-		// 		repo.EXPECT().UpdateQuestStatus(model.Quest{ID: 1, Status: 2}).Return(errors.New("any error")).Times(1)
-		// 	},
-		// 	wantErr: true,
-		// },
-		// {
-		// 	name: "report completed quest failed add completed test",
-		// 	fields: fields{
-		// 		r: NewMockRepository(mockCtrl),
-		// 		a: NewAdvMockRepository(mockCtrl),
-		// 	},
-		// 	args: args{
-		// 		quest_id:     1,
-		// 		adv_id:       1,
-		// 		is_completed: true,
-		// 	},
-		// 	mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
-		// 		advRepo.EXPECT().AddCompletedQuest(int64(1)).Return(errors.New("any error")).Times(1)
-		// 	},
-		// 	wantErr: true,
-		// },
-		// {
-		// 	name: "report uncompleted quest",
-		// 	fields: fields{
-		// 		r: NewMockRepository(mockCtrl),
-		// 		a: NewAdvMockRepository(mockCtrl),
-		// 	},
-		// 	args: args{
-		// 		quest_id:     1,
-		// 		adv_id:       1,
-		// 		is_completed: false,
-		// 	},
-		// 	mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
-		// 		repo.EXPECT().UpdateQuestStatus(model.Quest{ID: 1, Status: 0}).Return(nil).Times(1)
-		// 	},
-		// 	wantErr: false,
-		// },
-		// {
-		// 	name: "report uncompleted quest failed",
-		// 	fields: fields{
-		// 		r: NewMockRepository(mockCtrl),
-		// 		a: NewAdvMockRepository(mockCtrl),
-		// 	},
-		// 	args: args{
-		// 		quest_id:     1,
-		// 		adv_id:       1,
-		// 		is_completed: false,
-		// 	},
-		// 	mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
-		// 		repo.EXPECT().UpdateQuestStatus(model.Quest{ID: 1, Status: 0}).Return(errors.New("any error")).Times(1)
-		// 	},
-		// 	wantErr: true,
-		// },
+		{
+			name: "quest not taken",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     bulkQuest[3].ID,
+				adv_id:       adv.ID,
+				is_completed: true,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				repo.EXPECT().IsExistTakenBy(bulkQuest[3].ID, adv.ID).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "quest not exist",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     bulkQuest[3].ID,
+				adv_id:       adv.ID,
+				is_completed: true,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				repo.EXPECT().IsExistTakenBy(bulkQuest[3].ID, adv.ID).Return(nil).Times(1)
+				repo.EXPECT().GetQuest(bulkQuest[3].ID).Return(bulkQuest[3], errors.New("any error")).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "quest status not working quest",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     bulkQuest[0].ID,
+				adv_id:       adv.ID,
+				is_completed: true,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				repo.EXPECT().IsExistTakenBy(bulkQuest[0].ID, adv.ID).Return(nil).Times(1)
+				repo.EXPECT().GetQuest(bulkQuest[0].ID).Return(bulkQuest[0], nil).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "report completed quest failed update status",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     bulkQuest[3].ID,
+				adv_id:       adv.ID,
+				is_completed: true,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				repo.EXPECT().IsExistTakenBy(bulkQuest[3].ID, adv.ID).Return(nil).Times(1)
+				repo.EXPECT().GetQuest(bulkQuest[3].ID).Return(bulkQuest[3], nil).Times(1)
+				advRepo.EXPECT().AddCompletedQuest(adv.ID).Return(nil).Times(1)
+				repo.EXPECT().UpdateQuestStatus(model.Quest{ID: bulkQuest[3].ID, Status: constant.CompletedQuest}).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "report completed quest failed add completed test",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     bulkQuest[3].ID,
+				adv_id:       adv.ID,
+				is_completed: true,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				repo.EXPECT().IsExistTakenBy(bulkQuest[3].ID, adv.ID).Return(nil).Times(1)
+				repo.EXPECT().GetQuest(bulkQuest[3].ID).Return(bulkQuest[3], nil).Times(1)
+				advRepo.EXPECT().AddCompletedQuest(adv.ID).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "report uncompleted quest",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     bulkQuest[3].ID,
+				adv_id:       adv.ID,
+				is_completed: false,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				repo.EXPECT().IsExistTakenBy(bulkQuest[3].ID, adv.ID).Return(nil).Times(1)
+				repo.EXPECT().GetQuest(bulkQuest[3].ID).Return(bulkQuest[3], nil).Times(1)
+				repo.EXPECT().UpdateQuestStatus(model.Quest{ID: bulkQuest[3].ID, Status: constant.AvailableQuest}).Return(nil).Times(1)
+			},
+			wantErr: false,
+		},
+		{
+			name: "report uncompleted quest failed",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+				a: NewAdvMockRepository(mockCtrl),
+			},
+			args: args{
+				quest_id:     bulkQuest[3].ID,
+				adv_id:       adv.ID,
+				is_completed: false,
+			},
+			mock: func(repo *MockRepository, advRepo *AdvMockRepository) {
+				repo.EXPECT().IsExistTakenBy(bulkQuest[3].ID, adv.ID).Return(nil).Times(1)
+				repo.EXPECT().GetQuest(bulkQuest[3].ID).Return(bulkQuest[3], nil).Times(1)
+				repo.EXPECT().UpdateQuestStatus(model.Quest{ID: bulkQuest[3].ID, Status: 0}).Return(errors.New("any error")).Times(1)
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -777,9 +835,9 @@ func TestGetQuestActiveAdventurer(t *testing.T) {
 				ID: adv.ID,
 			},
 			mock: func(repo *MockRepository) {
-				repo.EXPECT().GetQuestActiveAdventurer(adv.ID).Return(bulkQuest[2:], nil).Times(1)
+				repo.EXPECT().GetQuestActiveAdventurer(adv.ID).Return(bulkQuest[3:], nil).Times(1)
 			},
-			outQuest: bulkQuest[2:],
+			outQuest: bulkQuest[3:],
 			outLen:   1,
 			wantErr:  false,
 		},
