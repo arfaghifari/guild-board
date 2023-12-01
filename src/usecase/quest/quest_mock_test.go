@@ -47,11 +47,12 @@ func (mr *MockRepositoryMockRecorder) Close() *gomock.Call {
 }
 
 // CreateQuest mocks base method.
-func (m *MockRepository) CreateQuest(arg0 quest.Quest) error {
+func (m *MockRepository) CreateQuest(arg0 quest.Quest) (quest.Quest, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateQuest", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(quest.Quest)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateQuest indicates an expected call of CreateQuest.
@@ -131,6 +132,35 @@ func (m *MockRepository) GetQuest(arg0 int64) (quest.Quest, error) {
 func (mr *MockRepositoryMockRecorder) GetQuest(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuest", reflect.TypeOf((*MockRepository)(nil).GetQuest), arg0)
+}
+
+// GetQuestActiveAdventurer mocks base method.
+func (m *MockRepository) GetQuestActiveAdventurer(arg0 int64) ([]quest.Quest, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetQuestActiveAdventurer", arg0)
+	ret0, _ := ret[0].([]quest.Quest)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetQuestActiveAdventurer indicates an expected call of GetQuestActiveAdventurer.
+func (mr *MockRepositoryMockRecorder) GetQuestActiveAdventurer(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestActiveAdventurer", reflect.TypeOf((*MockRepository)(nil).GetQuestActiveAdventurer), arg0)
+}
+
+// IsExistTakenBy mocks base method.
+func (m *MockRepository) IsExistTakenBy(arg0, arg1 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsExistTakenBy", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// IsExistTakenBy indicates an expected call of IsExistTakenBy.
+func (mr *MockRepositoryMockRecorder) IsExistTakenBy(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsExistTakenBy", reflect.TypeOf((*MockRepository)(nil).IsExistTakenBy), arg0, arg1)
 }
 
 // UpdateQuestRank mocks base method.

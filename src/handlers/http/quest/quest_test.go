@@ -267,7 +267,7 @@ func TestCreateQuest(t *testing.T) {
 		body string
 	}
 	type responses struct {
-		body SuccesMessage
+		body model.Quest
 	}
 	tests := []struct {
 		name           string
@@ -287,12 +287,12 @@ func TestCreateQuest(t *testing.T) {
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11, "reward_number" : 200000}`,
 			},
 			resp: responses{
-				body: SuccesMessage{Success: true},
+				body: bulkQuest[0],
 			},
 			mock: func(usecase *MockUsecase) {
 				quest := bulkQuest[0]
 				quest.ID = 0
-				usecase.EXPECT().CreateQuest(quest).Return(nil).Times(1)
+				usecase.EXPECT().CreateQuest(quest).Return(bulkQuest[0], nil).Times(1)
 			},
 			wantStatusCode: http.StatusOK,
 			wantErr:        false,
@@ -306,7 +306,7 @@ func TestCreateQuest(t *testing.T) {
 				body: `{`,
 			},
 			resp: responses{
-				body: SuccesMessage{Success: false},
+				body: model.Quest{},
 			},
 			mock: func(usecase *MockUsecase) {
 
@@ -323,7 +323,7 @@ func TestCreateQuest(t *testing.T) {
 				body: `{"description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11, "reward_number" : 200000}`,
 			},
 			resp: responses{
-				body: SuccesMessage{Success: false},
+				body: model.Quest{},
 			},
 			mock: func(usecase *MockUsecase) {
 
@@ -340,7 +340,7 @@ func TestCreateQuest(t *testing.T) {
 				body: `{"name" : "",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11, "reward_number" : 200000}`,
 			},
 			resp: responses{
-				body: SuccesMessage{Success: false},
+				body: model.Quest{},
 			},
 			mock: func(usecase *MockUsecase) {
 
@@ -357,7 +357,7 @@ func TestCreateQuest(t *testing.T) {
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" ,  "reward_number" : 200000}`,
 			},
 			resp: responses{
-				body: SuccesMessage{Success: false},
+				body: model.Quest{},
 			},
 			mock: func(usecase *MockUsecase) {
 
@@ -374,7 +374,7 @@ func TestCreateQuest(t *testing.T) {
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : -1, "reward_number" : 200000}`,
 			},
 			resp: responses{
-				body: SuccesMessage{Success: false},
+				body: model.Quest{},
 			},
 			mock: func(usecase *MockUsecase) {
 
@@ -391,7 +391,7 @@ func TestCreateQuest(t *testing.T) {
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11}`,
 			},
 			resp: responses{
-				body: SuccesMessage{Success: false},
+				body: model.Quest{},
 			},
 			mock: func(usecase *MockUsecase) {
 
@@ -408,7 +408,7 @@ func TestCreateQuest(t *testing.T) {
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11, "reward_number" : -1}`,
 			},
 			resp: responses{
-				body: SuccesMessage{Success: false},
+				body: model.Quest{},
 			},
 			mock: func(usecase *MockUsecase) {
 
@@ -425,12 +425,12 @@ func TestCreateQuest(t *testing.T) {
 				body: `{"name" : "menyelamatkan kucing",  "description" : "menyelamatkan kucing yang terjebak di atas pohon" , "minimum_rank" : 11, "reward_number" : 200000}`,
 			},
 			resp: responses{
-				body: SuccesMessage{Success: false},
+				body: model.Quest{},
 			},
 			mock: func(usecase *MockUsecase) {
 				quest := bulkQuest[0]
 				quest.ID = 0
-				usecase.EXPECT().CreateQuest(quest).Return(errors.New("any error")).Times(1)
+				usecase.EXPECT().CreateQuest(quest).Return(model.Quest{}, errors.New("any error")).Times(1)
 			},
 			wantStatusCode: http.StatusInternalServerError,
 			wantErr:        true,
@@ -449,7 +449,7 @@ func TestCreateQuest(t *testing.T) {
 			request = request.WithContext(ctx)
 			tt.mock(tt.fields.u)
 			router.ServeHTTP(recorder, request)
-			var resp MessageResponse
+			var resp QuestResponse
 			assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
 			assert.Equal(t, tt.wantStatusCode, recorder.Code, "error code")
 			assert.Equal(t, tt.resp.body, resp.Data)
@@ -1311,6 +1311,148 @@ func TestReportQuest(t *testing.T) {
 			tt.mock(tt.fields.u)
 			router.ServeHTTP(recorder, request)
 			var resp MessageResponse
+			assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
+			assert.Equal(t, tt.wantStatusCode, recorder.Code, "error code")
+			assert.Equal(t, tt.resp.body, resp.Data)
+			if tt.wantErr {
+				assert.NotEqual(t, "", resp.Header.Error, "error message")
+			} else {
+				assert.Equal(t, "", resp.Header.Error, "error message")
+			}
+		})
+	}
+}
+
+func TestGetActiveAdventurer(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	type fields struct {
+		u *MockUsecase
+	}
+	type requests struct {
+		is     bool
+		adv_id string
+	}
+	type responses struct {
+		body []model.Quest
+	}
+	tests := []struct {
+		name           string
+		fields         fields
+		req            requests
+		resp           responses
+		mock           func(*MockUsecase)
+		wantStatusCode int
+		wantErr        bool
+	}{
+		{
+			name: "success get available quest",
+			fields: fields{
+				u: NewMockUsecase(mockCtrl),
+			},
+			req: requests{
+				is:     true,
+				adv_id: "1",
+			},
+			resp: responses{
+				body: bulkQuest[:1],
+			},
+			mock: func(usecase *MockUsecase) {
+				usecase.EXPECT().GetQuestActiveAdventurer(adv.ID).Return(bulkQuest[:1], nil).Times(1)
+			},
+			wantStatusCode: http.StatusOK,
+			wantErr:        false,
+		},
+		{
+			name: "failed get available quest usecase",
+			fields: fields{
+				u: NewMockUsecase(mockCtrl),
+			},
+			req: requests{
+				is:     true,
+				adv_id: "1",
+			},
+			resp: responses{
+				body: []model.Quest{},
+			},
+			mock: func(usecase *MockUsecase) {
+				usecase.EXPECT().GetQuestActiveAdventurer(adv.ID).Return([]model.Quest{}, errors.New("any error")).Times(1)
+			},
+			wantStatusCode: http.StatusInternalServerError,
+			wantErr:        true,
+		},
+		{
+			name: "query empty",
+			fields: fields{
+				u: NewMockUsecase(mockCtrl),
+			},
+			req: requests{
+				is:     false,
+				adv_id: "",
+			},
+			resp: responses{
+				body: []model.Quest{},
+			},
+			mock: func(usecase *MockUsecase) {
+			},
+			wantStatusCode: http.StatusBadRequest,
+			wantErr:        true,
+		},
+		{
+			name: "query not int",
+			fields: fields{
+				u: NewMockUsecase(mockCtrl),
+			},
+			req: requests{
+				is:     true,
+				adv_id: "a",
+			},
+			resp: responses{
+				body: []model.Quest{},
+			},
+			mock: func(usecase *MockUsecase) {
+			},
+			wantStatusCode: http.StatusBadRequest,
+			wantErr:        true,
+		},
+		{
+			name: "query not valid",
+			fields: fields{
+				u: NewMockUsecase(mockCtrl),
+			},
+			req: requests{
+				is:     true,
+				adv_id: "-1",
+			},
+			resp: responses{
+				body: []model.Quest{},
+			},
+			mock: func(usecase *MockUsecase) {
+			},
+			wantStatusCode: http.StatusBadRequest,
+			wantErr:        true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			router := mux.NewRouter()
+			h := &handlers{
+				usecase: tt.fields.u,
+			}
+			router.HandleFunc("/quest-active-adv", h.GetQuestActiveAdventurer).Methods(http.MethodGet)
+			recorder := httptest.NewRecorder()
+			request, _ := http.NewRequest("GET", "/quest-active-adv", strings.NewReader(``))
+			if tt.req.is {
+				values := request.URL.Query()
+				values.Add("adv_id", tt.req.adv_id)
+				request.URL.RawQuery = values.Encode()
+			}
+			request = request.WithContext(ctx)
+			tt.mock(tt.fields.u)
+			router.ServeHTTP(recorder, request)
+			var resp GetQuestActiveAdventurer
 			assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp))
 			assert.Equal(t, tt.wantStatusCode, recorder.Code, "error code")
 			assert.Equal(t, tt.resp.body, resp.Data)

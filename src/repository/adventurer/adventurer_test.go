@@ -24,7 +24,7 @@ var adv = model.Adventurer{
 	ID:             1,
 	Name:           "andi",
 	Rank:           11,
-	CompletedQuest: 1,
+	CompletedQuest: 0,
 }
 
 func TestNewRepository(t *testing.T) {
@@ -46,7 +46,7 @@ func TestCreateAdventurer(t *testing.T) {
 	defer func() {
 		db.Close()
 	}()
-	query := regexp.QuoteMeta("INSERT INTO adventurer(name, rank) VALUES($1, $2)")
+	query := regexp.QuoteMeta("INSERT INTO adventurer(name, rank) VALUES($1, $2) RETURNING id")
 	type fields struct {
 		db *sql.DB
 	}
@@ -58,6 +58,7 @@ func TestCreateAdventurer(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
+		outAdv  model.Adventurer
 		wantErr bool
 	}{
 		{
@@ -70,12 +71,15 @@ func TestCreateAdventurer(t *testing.T) {
 			},
 			mock: func() {
 				prep := mock.ExpectPrepare(query)
-				prep.ExpectExec().WithArgs(adv.Name, adv.Rank).WillReturnResult(sqlmock.NewResult(0, 1))
+				rows := sqlmock.NewRows([]string{"id"}).
+					AddRow(adv.ID)
+				prep.ExpectQuery().WithArgs(adv.Name, adv.Rank).WillReturnRows(rows)
 			},
 			wantErr: false,
+			outAdv:  adv,
 		},
 		{
-			name: "failed created an adventurer",
+			name: "failed prepare query",
 			fields: fields{
 				db: db,
 			},
@@ -86,6 +90,22 @@ func TestCreateAdventurer(t *testing.T) {
 				prep := mock.ExpectPrepare(query)
 				prep.WillReturnError(sql.ErrConnDone)
 			},
+			outAdv:  model.Adventurer{},
+			wantErr: true,
+		},
+		{
+			name: "failed  query",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				adv: adv,
+			},
+			mock: func() {
+				prep := mock.ExpectPrepare(query)
+				prep.ExpectQuery().WillReturnError(sql.ErrConnDone)
+			},
+			outAdv:  model.Adventurer{},
 			wantErr: true,
 		},
 	}
@@ -95,7 +115,8 @@ func TestCreateAdventurer(t *testing.T) {
 				db: tt.fields.db,
 			}
 			tt.mock()
-			err := r.CreateAdventurer(tt.args.adv)
+			res, err := r.CreateAdventurer(tt.args.adv)
+			assert.Equal(t, tt.outAdv, res)
 			if tt.wantErr {
 				assert.Error(t, err, tt.name)
 			} else {

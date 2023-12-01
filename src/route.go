@@ -12,9 +12,6 @@ import (
 
 func Main() {
 
-	// Init database connection
-	// database.InitDB()
-
 	// Init serve HTTP
 	router := mux.NewRouter()
 	questHandlers, _ := qstHandlers.NewHandlers()

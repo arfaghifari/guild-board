@@ -35,11 +35,12 @@ func (m *MockUsecase) EXPECT() *MockUsecaseMockRecorder {
 }
 
 // CreateQuest mocks base method.
-func (m *MockUsecase) CreateQuest(arg0 quest.Quest) error {
+func (m *MockUsecase) CreateQuest(arg0 quest.Quest) (quest.Quest, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateQuest", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(quest.Quest)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateQuest indicates an expected call of CreateQuest.
@@ -60,6 +61,21 @@ func (m *MockUsecase) DeleteQuest(arg0 quest.Quest) error {
 func (mr *MockUsecaseMockRecorder) DeleteQuest(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteQuest", reflect.TypeOf((*MockUsecase)(nil).DeleteQuest), arg0)
+}
+
+// GetQuestActiveAdventurer mocks base method.
+func (m *MockUsecase) GetQuestActiveAdventurer(arg0 int64) ([]quest.Quest, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetQuestActiveAdventurer", arg0)
+	ret0, _ := ret[0].([]quest.Quest)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetQuestActiveAdventurer indicates an expected call of GetQuestActiveAdventurer.
+func (mr *MockUsecaseMockRecorder) GetQuestActiveAdventurer(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestActiveAdventurer", reflect.TypeOf((*MockUsecase)(nil).GetQuestActiveAdventurer), arg0)
 }
 
 // GetQuestByStatus mocks base method.

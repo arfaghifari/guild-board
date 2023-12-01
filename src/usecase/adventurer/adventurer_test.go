@@ -37,6 +37,7 @@ func TestCreateAdventurer(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func(*MockRepository)
+		outAdv  model.Adventurer
 		wantErr bool
 	}{
 		{
@@ -48,8 +49,9 @@ func TestCreateAdventurer(t *testing.T) {
 				adv: adv,
 			},
 			mock: func(repo *MockRepository) {
-				repo.EXPECT().CreateAdventurer(adv).Return(nil).Times(1)
+				repo.EXPECT().CreateAdventurer(adv).Return(adv, nil).Times(1)
 			},
+			outAdv:  adv,
 			wantErr: false,
 		},
 		{
@@ -61,8 +63,9 @@ func TestCreateAdventurer(t *testing.T) {
 				adv: adv,
 			},
 			mock: func(repo *MockRepository) {
-				repo.EXPECT().CreateAdventurer(adv).Return(errors.New("any error")).Times(1)
+				repo.EXPECT().CreateAdventurer(adv).Return(model.Adventurer{}, errors.New("any error")).Times(1)
 			},
+			outAdv:  model.Adventurer{},
 			wantErr: true,
 		},
 	}
@@ -72,7 +75,8 @@ func TestCreateAdventurer(t *testing.T) {
 				repo: tt.fields.r,
 			}
 			tt.mock(tt.fields.r)
-			err := u.CreateAdventurer(tt.args.adv)
+			res, err := u.CreateAdventurer(tt.args.adv)
+			assert.Equal(t, tt.outAdv, res)
 			if tt.wantErr {
 				assert.Error(t, err, tt.name)
 			} else {
@@ -133,6 +137,70 @@ func TestUpdateAdventureRank(t *testing.T) {
 			}
 			tt.mock(tt.fields.r)
 			err := u.UpdateAdventurerRank(tt.args.adv)
+			if tt.wantErr {
+				assert.Error(t, err, tt.name)
+			} else {
+				assert.NoError(t, err, tt.name)
+			}
+		})
+	}
+}
+
+func TestGetAdventurer(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	type fields struct {
+		r *MockRepository
+	}
+	type args struct {
+		ID int64
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func(*MockRepository)
+		outAdv  model.Adventurer
+		wantErr bool
+	}{
+		{
+			name: "success get an adventurer",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+			},
+			args: args{
+				ID: adv.ID,
+			},
+			mock: func(repo *MockRepository) {
+				repo.EXPECT().GetAdventurer(adv.ID).Return(adv, nil).Times(1)
+			},
+			outAdv:  adv,
+			wantErr: false,
+		},
+		{
+			name: "failed",
+			fields: fields{
+				r: NewMockRepository(mockCtrl),
+			},
+			args: args{
+				ID: adv.ID,
+			},
+			mock: func(repo *MockRepository) {
+				repo.EXPECT().GetAdventurer(adv.ID).Return(model.Adventurer{}, errors.New("any error")).Times(1)
+			},
+			outAdv:  model.Adventurer{},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := &usecase{
+				repo: tt.fields.r,
+			}
+			tt.mock(tt.fields.r)
+			res, err := u.GetAdventurer(tt.args.ID)
+			assert.Equal(t, tt.outAdv, res)
 			if tt.wantErr {
 				assert.Error(t, err, tt.name)
 			} else {

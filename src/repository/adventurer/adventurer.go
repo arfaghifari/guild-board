@@ -9,7 +9,7 @@ import (
 
 type Repository interface {
 	Close()
-	CreateAdventurer(model.Adventurer) error
+	CreateAdventurer(model.Adventurer) (model.Adventurer, error)
 	UpdateAdventurerRank(model.Adventurer) error
 	GetAdventurer(int64) (model.Adventurer, error)
 	AddCompletedQuest(int64) error
@@ -29,17 +29,22 @@ func (r *repository) Close() {
 	r.db.Close()
 }
 
-func (r *repository) CreateAdventurer(adventurer model.Adventurer) error {
+func (r *repository) CreateAdventurer(adventurer model.Adventurer) (adv model.Adventurer, err error) {
 	db := r.db
+	adv = adventurer
 	query := `INSERT INTO adventurer(name, rank)
-	VALUES($1, $2)`
+	VALUES($1, $2) RETURNING id`
 	createForm, err := db.Prepare(query)
 	if err != nil {
-		return err
+		return model.Adventurer{}, err
 	}
-	createForm.Exec(adventurer.Name, adventurer.Rank)
+	err = createForm.QueryRow(adventurer.Name, adventurer.Rank).Scan(&adv.ID)
+	if err != nil {
+		return model.Adventurer{}, err
+	}
+	adv.CompletedQuest = 0
 	defer createForm.Close()
-	return err
+	return
 }
 
 func (r *repository) UpdateAdventurerRank(adventurer model.Adventurer) error {

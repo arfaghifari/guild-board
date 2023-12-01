@@ -22,9 +22,19 @@ type GetQuestByStatusResponse struct {
 	Data   []model.GetQuestByStatus `json:"data"`
 }
 
+type GetQuestActiveAdventurer struct {
+	Header `json:"header"`
+	Data   []model.Quest `json:"data"`
+}
+
 type MessageResponse struct {
 	Header `json:"header"`
 	Data   SuccesMessage `json:"data"`
+}
+
+type QuestResponse struct {
+	Header `json:"header"`
+	Data   model.Quest `json:"data"`
 }
 
 type SuccesMessage struct {
@@ -39,6 +49,7 @@ type Handlers interface {
 	UpdateQuestReward(http.ResponseWriter, *http.Request)
 	TakeQuest(http.ResponseWriter, *http.Request)
 	ReportQuest(http.ResponseWriter, *http.Request)
+	GetQuestActiveAdventurer(http.ResponseWriter, *http.Request)
 }
 
 type handlers struct {
@@ -97,7 +108,7 @@ func (h *handlers) GetQuestByStatus(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) CreateQuest(w http.ResponseWriter, r *http.Request) {
 	var (
 		statusCode = http.StatusBadRequest
-		resp       MessageResponse
+		resp       QuestResponse
 		quest      model.Quest
 	)
 	defer func() {
@@ -112,6 +123,7 @@ func (h *handlers) CreateQuest(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, string(responseWriter), statusCode)
 		}
 	}()
+	resp.Data = model.Quest{}
 
 	if err := json.NewDecoder(r.Body).Decode(&quest); err != nil {
 		resp.Header.Error = err.Error()
@@ -122,7 +134,7 @@ func (h *handlers) CreateQuest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.usecase.CreateQuest(quest)
+	res, err := h.usecase.CreateQuest(quest)
 
 	if err != nil {
 		statusCode = 500
@@ -130,7 +142,7 @@ func (h *handlers) CreateQuest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	statusCode = 200
-	resp.Data.Success = true
+	resp.Data = res
 
 }
 
@@ -332,4 +344,43 @@ func (h *handlers) ReportQuest(w http.ResponseWriter, r *http.Request) {
 	}
 	statusCode = 200
 	resp.Data.Success = true
+}
+
+func (h *handlers) GetQuestActiveAdventurer(w http.ResponseWriter, r *http.Request) {
+	var (
+		statusCode = http.StatusBadRequest
+		resp       GetQuestActiveAdventurer
+	)
+	resp.Data = []model.Quest{}
+	defer func() {
+		resp.StatusCode = statusCode
+		responseWriter, err := json.Marshal(resp)
+		if err != nil {
+			log.Fatal("Failed build response")
+		}
+		if statusCode == http.StatusOK {
+			w.Write(responseWriter)
+		} else {
+			http.Error(w, string(responseWriter), statusCode)
+		}
+	}()
+	adv_id, err := strconv.Atoi(r.URL.Query().Get("adv_id"))
+	if err != nil {
+		resp.Header.Error = err.Error()
+		return
+	}
+	if adv_id <= 0 {
+		resp.Header.Error = "Invalid  id"
+		return
+	}
+
+	res, err := h.usecase.GetQuestActiveAdventurer(int64(adv_id))
+	if err != nil {
+		statusCode = 500
+		resp.Header.Error = err.Error()
+		return
+	}
+	statusCode = 200
+	resp.Data = res
+
 }

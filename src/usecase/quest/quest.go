@@ -11,12 +11,13 @@ import (
 
 type Usecase interface {
 	GetQuestByStatus(int32) ([]model.GetQuestByStatus, error)
-	CreateQuest(model.Quest) error
+	CreateQuest(model.Quest) (model.Quest, error)
 	DeleteQuest(model.Quest) error
 	UpdateQuestRank(model.Quest) error
 	UpdateQuestReward(model.Quest) error
 	TakeQuest(int64, int64) error
 	ReportQuest(int64, int64, bool) error
+	GetQuestActiveAdventurer(int64) ([]model.Quest, error)
 }
 
 type usecase struct {
@@ -39,7 +40,7 @@ func (u *usecase) GetQuestByStatus(status int32) ([]model.GetQuestByStatus, erro
 	}
 }
 
-func (u *usecase) CreateQuest(quest model.Quest) error {
+func (u *usecase) CreateQuest(quest model.Quest) (model.Quest, error) {
 	return u.repo.CreateQuest(quest)
 }
 
@@ -81,6 +82,16 @@ func (u *usecase) TakeQuest(quest_id, adventurer_id int64) error {
 }
 
 func (u *usecase) ReportQuest(quest_id, adventurer_id int64, is bool) error {
+	if err := u.repo.IsExistTakenBy(quest_id, adventurer_id); err != nil {
+		return err
+	}
+	quest, err := u.repo.GetQuest(quest_id)
+	if err != nil {
+		return err
+	}
+	if quest.Status != constant.WorkingQuest {
+		return errors.New("quest have not taken")
+	}
 	if !is {
 		quest := model.Quest{
 			ID:     quest_id,
@@ -99,4 +110,8 @@ func (u *usecase) ReportQuest(quest_id, adventurer_id int64, is bool) error {
 		err = u.repo.UpdateQuestStatus(quest)
 		return err
 	}
+}
+
+func (u *usecase) GetQuestActiveAdventurer(adv_id int64) ([]model.Quest, error) {
+	return u.repo.GetQuestActiveAdventurer(adv_id)
 }

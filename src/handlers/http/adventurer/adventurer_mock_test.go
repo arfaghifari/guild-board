@@ -35,17 +35,33 @@ func (m *MockUsecase) EXPECT() *MockUsecaseMockRecorder {
 }
 
 // CreateAdventurer mocks base method.
-func (m *MockUsecase) CreateAdventurer(arg0 adventurer.Adventurer) error {
+func (m *MockUsecase) CreateAdventurer(arg0 adventurer.Adventurer) (adventurer.Adventurer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateAdventurer", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(adventurer.Adventurer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateAdventurer indicates an expected call of CreateAdventurer.
 func (mr *MockUsecaseMockRecorder) CreateAdventurer(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAdventurer", reflect.TypeOf((*MockUsecase)(nil).CreateAdventurer), arg0)
+}
+
+// GetAdventurer mocks base method.
+func (m *MockUsecase) GetAdventurer(arg0 int64) (adventurer.Adventurer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAdventurer", arg0)
+	ret0, _ := ret[0].(adventurer.Adventurer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAdventurer indicates an expected call of GetAdventurer.
+func (mr *MockUsecaseMockRecorder) GetAdventurer(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAdventurer", reflect.TypeOf((*MockUsecase)(nil).GetAdventurer), arg0)
 }
 
 // UpdateAdventurerRank mocks base method.

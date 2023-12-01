@@ -12,13 +12,15 @@ type Repository interface {
 	Close()
 	GetAllCompletedQuest() ([]model.GetQuestByStatus, error)
 	GetAllAvailableQuest() ([]model.GetQuestByStatus, error)
-	CreateQuest(model.Quest) error
+	CreateQuest(model.Quest) (model.Quest, error)
 	UpdateQuestRank(model.Quest) error
 	UpdateQuestStatus(model.Quest) error
 	UpdateQuestReward(model.Quest) error
 	DeleteQuest(model.Quest) error
 	GetQuest(int64) (model.Quest, error)
 	CreateTakenBy(int64, int64) error
+	IsExistTakenBy(int64, int64) error
+	GetQuestActiveAdventurer(int64) ([]model.Quest, error)
 }
 
 type repository struct {
@@ -36,7 +38,6 @@ func (r *repository) Close() {
 }
 
 func (r *repository) GetAllCompletedQuest() (quests []model.GetQuestByStatus, err error) {
-
 	db := r.db
 
 	query := `
@@ -90,17 +91,22 @@ func (r *repository) GetAllAvailableQuest() (quests []model.GetQuestByStatus, er
 	return
 }
 
-func (r *repository) CreateQuest(quest model.Quest) error {
+func (r *repository) CreateQuest(quest model.Quest) (qst model.Quest, err error) {
 	db := r.db
 	query := `INSERT INTO quest(name, description, minimum_rank, reward_number)
-	VALUES($1, $2, $3, $4)`
+	VALUES($1, $2, $3, $4) RETURNING quest_id`
 	createForm, err := db.Prepare(query)
+	qst = quest
 	if err != nil {
-		return err
+		return model.Quest{}, err
 	}
-	createForm.Exec(quest.Name, quest.Description, quest.MinimumRank, quest.RewardNumber)
+	err = createForm.QueryRow(quest.Name, quest.Description, quest.MinimumRank, quest.RewardNumber).Scan(&qst.ID)
+	if err != nil {
+		return model.Quest{}, err
+	}
+	qst.Status = 0
 	defer createForm.Close()
-	return err
+	return
 }
 
 func (r *repository) UpdateQuestRank(quest model.Quest) error {
@@ -160,12 +166,22 @@ func (r *repository) DeleteQuest(quest model.Quest) error {
 
 func (r *repository) GetQuest(id int64) (quest model.Quest, err error) {
 	db := r.db
-	query := `SELECT name, description, minimum_rank, reward_number, status 
+	query := `SELECT name, description, minimum_rank, reward_number, status
 	FROM quest
 	WHERE quest_id = $1`
 	quest.ID = id
 	err = db.QueryRow(query, id).Scan(&quest.Name, &quest.Description, &quest.MinimumRank, &quest.RewardNumber, &quest.Status)
 	return
+}
+
+func (r *repository) IsExistTakenBy(quest_id, adv_id int64) error {
+	var one int
+	db := r.db
+	query := `SELECT 1
+	FROM taken_by
+	WHERE quest_id = $1 AND adv_id = $2`
+	return db.QueryRow(query, quest_id, adv_id).Scan(&one)
+
 }
 
 func (r *repository) CreateTakenBy(quest_id, adventurer_id int64) error {
@@ -179,4 +195,30 @@ func (r *repository) CreateTakenBy(quest_id, adventurer_id int64) error {
 	createForm.Exec(quest_id, adventurer_id)
 	defer createForm.Close()
 	return err
+}
+
+func (r *repository) GetQuestActiveAdventurer(id int64) (quests []model.Quest, err error) {
+	db := r.db
+
+	query := `
+	SELECT quest_id, name, description, minimum_rank, reward_number, status
+	FROM quest NATURAL JOIN taken_by
+	WHERE status = $1 AND adv_id = $2
+	`
+	quests = []model.Quest{}
+	rows, err := db.Query(query, constant.WorkingQuest, id)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		quest := model.Quest{}
+		if err = rows.Scan(&quest.ID, &quest.Name, &quest.Description, &quest.MinimumRank, &quest.RewardNumber, &quest.Status); err != nil {
+			return
+		}
+		quests = append(quests, quest)
+	}
+
+	return
 }
