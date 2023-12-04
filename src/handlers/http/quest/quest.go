@@ -74,6 +74,7 @@ func (h *handlers) GetQuestByStatus(w http.ResponseWriter, r *http.Request) {
 	)
 	resp.Data = []model.GetQuestByStatus{}
 	defer func() {
+		w.Header().Set("Content-Type", "application/json")
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
 		if err != nil {
@@ -112,6 +113,7 @@ func (h *handlers) CreateQuest(w http.ResponseWriter, r *http.Request) {
 		quest      model.Quest
 	)
 	defer func() {
+		w.Header().Set("Content-Type", "application/json")
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
 		if err != nil {
@@ -153,6 +155,7 @@ func (h *handlers) DeleteQuest(w http.ResponseWriter, r *http.Request) {
 		quest      model.Quest
 	)
 	defer func() {
+		w.Header().Set("Content-Type", "application/json")
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
 		if err != nil {
@@ -193,6 +196,7 @@ func (h *handlers) UpdateQuestRank(w http.ResponseWriter, r *http.Request) {
 		quest      model.Quest
 	)
 	defer func() {
+		w.Header().Set("Content-Type", "application/json")
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
 		if err != nil {
@@ -233,6 +237,7 @@ func (h *handlers) UpdateQuestReward(w http.ResponseWriter, r *http.Request) {
 		quest      model.Quest
 	)
 	defer func() {
+		w.Header().Set("Content-Type", "application/json")
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
 		if err != nil {
@@ -273,6 +278,7 @@ func (h *handlers) TakeQuest(w http.ResponseWriter, r *http.Request) {
 		takeByRequest model.TakenBy
 	)
 	defer func() {
+		w.Header().Set("Content-Type", "application/json")
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
 		if err != nil {
@@ -313,6 +319,7 @@ func (h *handlers) ReportQuest(w http.ResponseWriter, r *http.Request) {
 		reportQuest model.ReportQuest
 	)
 	defer func() {
+		w.Header().Set("Content-Type", "application/json")
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
 		if err != nil {
@@ -353,6 +360,7 @@ func (h *handlers) GetQuestActiveAdventurer(w http.ResponseWriter, r *http.Reque
 	)
 	resp.Data = []model.Quest{}
 	defer func() {
+		w.Header().Set("Content-Type", "application/json")
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
 		if err != nil {

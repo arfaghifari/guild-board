@@ -52,6 +52,7 @@ func (h *handlers) CreateAdventurer(w http.ResponseWriter, r *http.Request) {
 		adventurer model.Adventurer
 	)
 	defer func() {
+		w.Header().Set("Content-Type", "application/json")
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
 		if err != nil {
@@ -90,6 +91,7 @@ func (h *handlers) UpdateAdventurerRank(w http.ResponseWriter, r *http.Request) 
 		adventurer model.Adventurer
 	)
 	defer func() {
+		w.Header().Set("Content-Type", "application/json")
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
 		if err != nil {
@@ -129,6 +131,7 @@ func (h *handlers) GetAdventurer(w http.ResponseWriter, r *http.Request) {
 		resp       AdvResponse
 	)
 	defer func() {
+		w.Header().Set("Content-Type", "application/json")
 		resp.StatusCode = statusCode
 		responseWriter, err := json.Marshal(resp)
 		if err != nil {
