@@ -159,7 +159,9 @@ func (r *repository) DeleteQuest(quest model.Quest) error {
 	if err != nil {
 		return err
 	}
-	deleteForm.Exec(quest.ID)
+	_, err = deleteForm.Exec(quest.ID)
+	// res.LastInsertId()
+	// res.RowsAffected()
 	defer deleteForm.Close()
 	return err
 }

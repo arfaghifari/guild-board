@@ -96,11 +96,11 @@ func (h *handlers) GetQuestByStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	res, err := h.usecase.GetQuestByStatus(int32(status))
 	if err != nil {
-		statusCode = 500
+		statusCode = http.StatusInternalServerError
 		resp.Header.Error = err.Error()
 		return
 	}
-	statusCode = 200
+	statusCode = http.StatusOK
 	resp.Data = res
 
 }
@@ -137,11 +137,11 @@ func (h *handlers) CreateQuest(w http.ResponseWriter, r *http.Request) {
 	res, err := h.usecase.CreateQuest(quest)
 
 	if err != nil {
-		statusCode = 500
+		statusCode = http.StatusInternalServerError
 		resp.Header.Error = err.Error()
 		return
 	}
-	statusCode = 200
+	statusCode = http.StatusOK
 	resp.Data = res
 
 }
@@ -178,11 +178,11 @@ func (h *handlers) DeleteQuest(w http.ResponseWriter, r *http.Request) {
 	err := h.usecase.DeleteQuest(quest)
 
 	if err != nil {
-		statusCode = 500
+		statusCode = http.StatusInternalServerError
 		resp.Header.Error = err.Error()
 		return
 	}
-	statusCode = 200
+	statusCode = http.StatusOK
 	resp.Data.Success = true
 }
 
@@ -218,11 +218,11 @@ func (h *handlers) UpdateQuestRank(w http.ResponseWriter, r *http.Request) {
 	err := h.usecase.UpdateQuestRank(quest)
 
 	if err != nil {
-		statusCode = 500
+		statusCode = http.StatusInternalServerError
 		resp.Header.Error = err.Error()
 		return
 	}
-	statusCode = 200
+	statusCode = http.StatusOK
 	resp.Data.Success = true
 }
 
@@ -258,11 +258,11 @@ func (h *handlers) UpdateQuestReward(w http.ResponseWriter, r *http.Request) {
 	err := h.usecase.UpdateQuestReward(quest)
 
 	if err != nil {
-		statusCode = 500
+		statusCode = http.StatusInternalServerError
 		resp.Header.Error = err.Error()
 		return
 	}
-	statusCode = 200
+	statusCode = http.StatusOK
 	resp.Data.Success = true
 }
 
@@ -298,11 +298,11 @@ func (h *handlers) TakeQuest(w http.ResponseWriter, r *http.Request) {
 	err := h.usecase.TakeQuest(takeByRequest.QuestID, takeByRequest.AdventurerID)
 
 	if err != nil {
-		statusCode = 500
+		statusCode = http.StatusInternalServerError
 		resp.Header.Error = err.Error()
 		return
 	}
-	statusCode = 200
+	statusCode = http.StatusOK
 	resp.Data.Success = true
 }
 
@@ -338,11 +338,11 @@ func (h *handlers) ReportQuest(w http.ResponseWriter, r *http.Request) {
 	err := h.usecase.ReportQuest(reportQuest.QuestID, reportQuest.AdventurerID, *reportQuest.IsCompleted)
 
 	if err != nil {
-		statusCode = 500
+		statusCode = http.StatusInternalServerError
 		resp.Header.Error = err.Error()
 		return
 	}
-	statusCode = 200
+	statusCode = http.StatusOK
 	resp.Data.Success = true
 }
 
@@ -376,11 +376,11 @@ func (h *handlers) GetQuestActiveAdventurer(w http.ResponseWriter, r *http.Reque
 
 	res, err := h.usecase.GetQuestActiveAdventurer(int64(adv_id))
 	if err != nil {
-		statusCode = 500
+		statusCode = http.StatusInternalServerError
 		resp.Header.Error = err.Error()
 		return
 	}
-	statusCode = 200
+	statusCode = http.StatusOK
 	resp.Data = res
 
 }

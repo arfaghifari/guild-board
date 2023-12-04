@@ -75,11 +75,11 @@ func (h *handlers) CreateAdventurer(w http.ResponseWriter, r *http.Request) {
 
 	res, err := h.usecase.CreateAdventurer(adventurer)
 	if err != nil {
-		statusCode = 500
+		statusCode = http.StatusInternalServerError
 		resp.Header.Error = err.Error()
 		return
 	}
-	statusCode = 200
+	statusCode = http.StatusOK
 	resp.Data = res
 }
 
@@ -115,11 +115,11 @@ func (h *handlers) UpdateAdventurerRank(w http.ResponseWriter, r *http.Request) 
 	err := h.usecase.UpdateAdventurerRank(adventurer)
 
 	if err != nil {
-		statusCode = 500
+		statusCode = http.StatusInternalServerError
 		resp.Header.Error = err.Error()
 		return
 	}
-	statusCode = 200
+	statusCode = http.StatusOK
 	resp.Data.Success = true
 }
 
@@ -153,10 +153,10 @@ func (h *handlers) GetAdventurer(w http.ResponseWriter, r *http.Request) {
 
 	res, err := h.usecase.GetAdventurer(int64(adv_id))
 	if err != nil {
-		statusCode = 500
+		statusCode = http.StatusInternalServerError
 		resp.Header.Error = err.Error()
 		return
 	}
-	statusCode = 200
+	statusCode = http.StatusOK
 	resp.Data = res
 }
